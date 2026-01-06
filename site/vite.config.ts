@@ -1,7 +1,7 @@
 import { defineConfig } from "vite"
 
 export default defineConfig({
-  base: "/buuget_script/",
+  base: "/budget_script/",
   server: {
     port: 3000,
   },
