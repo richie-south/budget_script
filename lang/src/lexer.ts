@@ -17,20 +17,28 @@ type Type =
   | typeof lex_HASH
   | typeof lex_EOF
 
-export type Token = {
+type Position = {
   line: number
-  position: number
+  start: number
+  end: number
+}
+
+export type Token = {
+  position: Position
   value: string
   type: Type
 }
 
-function token(
-  type: Type,
-  value: string,
-  line: number,
-  position: number,
-): Token {
-  return {value, type, line, position}
+function token(type: Type, value: string, position: Position): Token {
+  return {
+    value,
+    type,
+    position: {
+      line: position.line,
+      start: position.start,
+      end: position.end,
+    },
+  }
 }
 
 function isWhitespace(str: string): boolean {
@@ -45,15 +53,14 @@ function isAlpha(str: string): boolean {
   return str.toUpperCase() != str.toLowerCase()
 }
 
-function getNumber(chars: string[]): [string, number] {
+function getNumber(chars: string[]): string {
   let num = ''
-  let position = 0
+
   while (chars.length > 0 && isNumber(chars[0])) {
-    position += 1
     num += chars.shift()
   }
 
-  return [num, position]
+  return num
 }
 
 function isNumber(str: string): boolean {
@@ -80,35 +87,88 @@ export function tokenize(sourceCode: string): Token[] {
     const char = chars[0]
 
     if (char === '(') {
-      position += 1
-      tokens.push(token(lex_OPEN_PARENTHESIS, chars.shift(), line, position))
+      const endPos = position + char.length
+      tokens.push(
+        token(lex_OPEN_PARENTHESIS, chars.shift(), {
+          line,
+          start: position,
+          end: endPos,
+        }),
+      )
+      position = endPos
     } else if (char == ')') {
-      position += 1
-      tokens.push(token(lex_CLOSE_PARENTHESIS, chars.shift(), line, position))
+      const endPos = position + char.length
+      tokens.push(
+        token(lex_CLOSE_PARENTHESIS, chars.shift(), {
+          line,
+          start: position,
+          end: endPos,
+        }),
+      )
+      position = endPos
     } else if (isBinaryOperator(char)) {
-      position += 1
-      tokens.push(token(lex_BINARY_OPERATOR, chars.shift(), line, position))
+      const endPos = position + char.length
+      tokens.push(
+        token(lex_BINARY_OPERATOR, chars.shift(), {
+          line,
+          start: position,
+          end: endPos,
+        }),
+      )
+      position = endPos
     } else if (isEqual(char)) {
-      position += 1
-      tokens.push(token(lex_EQUALS, chars.shift(), line, position))
+      const endPos = position + char.length
+      tokens.push(
+        token(lex_EQUALS, chars.shift(), {
+          line,
+          start: position,
+          end: endPos,
+        }),
+      )
+      position = endPos
     } else if (char === '#') {
-      position += 1
-      tokens.push(token(lex_HASH, chars.shift(), line, position))
+      const endPos = position + char.length
+      tokens.push(
+        token(lex_HASH, chars.shift(), {
+          line,
+          start: position,
+          end: endPos,
+        }),
+      )
+      position = endPos
     } else {
       if (isAlpha(char)) {
         let str = ''
         while (chars.length > 0 && isAlpha(chars[0])) {
-          position += 1
           str += chars.shift()
         }
 
-        tokens.push(token(lex_IDENTIFIER, str, line, position))
+        const endPos = position + str.length
+        tokens.push(
+          token(lex_IDENTIFIER, str, {
+            line,
+            start: position,
+            end: endPos,
+          }),
+        )
+
+        position = endPos
       } else if (isNumber(char)) {
-        const [num, pos] = getNumber(chars)
-        position += pos
-        tokens.push(token(lex_NUMBER, num, line, position))
+        const num = getNumber(chars)
+
+        const endPos = position + num.length
+        tokens.push(
+          token(lex_NUMBER, num, {
+            line,
+            start: position,
+            end: endPos,
+          }),
+        )
+
+        position = endPos
       } else if (isWhitespace(char)) {
         position += 1
+
         chars.shift()
       } else if (isNewLine(char)) {
         line += 1

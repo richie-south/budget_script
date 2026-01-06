@@ -5,9 +5,21 @@ describe('tokenize', () => {
     const src = `income = 1000`
 
     expect(tokenize(src)).toEqual([
-      {value: 'income', type: 'Identifier', line: 0, position: 6},
-      {value: '=', type: 'Equals', line: 0, position: 8},
-      {value: '1000', type: 'Number', line: 0, position: 13},
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        value: '1000',
+        type: 'Number',
+        position: {line: 0, start: 9, end: 13},
+      },
       {value: 'EOF', type: 'EOF'},
     ])
   })
@@ -16,15 +28,51 @@ describe('tokenize', () => {
     const src = `10 + 20 - 10 * 3 / 2`
 
     expect(tokenize(src)).toEqual([
-      {value: '10', type: 'Number', line: 0, position: 2},
-      {value: '+', type: 'BinaryOperator', line: 0, position: 4},
-      {value: '20', type: 'Number', line: 0, position: 7},
-      {value: '-', type: 'BinaryOperator', line: 0, position: 9},
-      {value: '10', type: 'Number', line: 0, position: 12},
-      {value: '*', type: 'BinaryOperator', line: 0, position: 14},
-      {value: '3', type: 'Number', line: 0, position: 16},
-      {value: '/', type: 'BinaryOperator', line: 0, position: 18},
-      {value: '2', type: 'Number', line: 0, position: 20},
+      {
+        value: '10',
+        type: 'Number',
+        position: {line: 0, start: 0, end: 2},
+      },
+      {
+        value: '+',
+        type: 'BinaryOperator',
+        position: {line: 0, start: 3, end: 4},
+      },
+      {
+        value: '20',
+        type: 'Number',
+        position: {line: 0, start: 5, end: 7},
+      },
+      {
+        value: '-',
+        type: 'BinaryOperator',
+        position: {line: 0, start: 8, end: 9},
+      },
+      {
+        value: '10',
+        type: 'Number',
+        position: {line: 0, start: 10, end: 12},
+      },
+      {
+        value: '*',
+        type: 'BinaryOperator',
+        position: {line: 0, start: 13, end: 14},
+      },
+      {
+        value: '3',
+        type: 'Number',
+        position: {line: 0, start: 15, end: 16},
+      },
+      {
+        value: '/',
+        type: 'BinaryOperator',
+        position: {line: 0, start: 17, end: 18},
+      },
+      {
+        value: '2',
+        type: 'Number',
+        position: {line: 0, start: 19, end: 20},
+      },
       {value: 'EOF', type: 'EOF'},
     ])
   })
@@ -38,17 +86,61 @@ describe('tokenize', () => {
     `
 
     expect(tokenize(src)).toEqual([
-      {value: 'income', type: 'Identifier', line: 1, position: 10},
-      {value: '=', type: 'Equals', line: 1, position: 12},
-      {value: '1000', type: 'Number', line: 1, position: 17},
-      {value: 'incomeF', type: 'Identifier', line: 2, position: 11},
-      {value: '=', type: 'Equals', line: 2, position: 13},
-      {value: '2000', type: 'Number', line: 2, position: 18},
-      {value: 'result', type: 'Identifier', line: 4, position: 10},
-      {value: '=', type: 'Equals', line: 4, position: 12},
-      {value: 'income', type: 'Identifier', line: 4, position: 19},
-      {value: '+', type: 'BinaryOperator', line: 4, position: 21},
-      {value: 'incomeF', type: 'Identifier', line: 4, position: 29},
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 1, start: 4, end: 10},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 1, start: 11, end: 12},
+      },
+      {
+        value: '1000',
+        type: 'Number',
+        position: {line: 1, start: 13, end: 17},
+      },
+      {
+        value: 'incomeF',
+        type: 'Identifier',
+        position: {line: 2, start: 4, end: 11},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 2, start: 12, end: 13},
+      },
+      {
+        value: '2000',
+        type: 'Number',
+        position: {line: 2, start: 14, end: 18},
+      },
+      {
+        value: 'result',
+        type: 'Identifier',
+        position: {line: 4, start: 4, end: 10},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 4, start: 11, end: 12},
+      },
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 4, start: 13, end: 19},
+      },
+      {
+        value: '+',
+        type: 'BinaryOperator',
+        position: {line: 4, start: 20, end: 21},
+      },
+      {
+        value: 'incomeF',
+        type: 'Identifier',
+        position: {line: 4, start: 22, end: 29},
+      },
       {value: 'EOF', type: 'EOF'},
     ])
   })
@@ -62,18 +154,66 @@ describe('tokenize', () => {
     `
 
     expect(tokenize(src)).toEqual([
-      {value: 'income', type: 'Identifier', line: 1, position: 10},
-      {value: '=', type: 'Equals', line: 1, position: 12},
-      {value: '1000', type: 'Number', line: 1, position: 17},
-      {value: 'incomeF', type: 'Identifier', line: 2, position: 11},
-      {value: '=', type: 'Equals', line: 2, position: 13},
-      {value: '2000', type: 'Number', line: 2, position: 18},
-      {value: 'result', type: 'Identifier', line: 4, position: 10},
-      {value: '=', type: 'Equals', line: 4, position: 12},
-      {value: 'income', type: 'Identifier', line: 4, position: 19},
-      {value: '+', type: 'BinaryOperator', line: 4, position: 21},
-      {value: 'incomeF', type: 'Identifier', line: 4, position: 29},
-      {value: '#', type: 'Hash', line: 4, position: 31},
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 1, start: 4, end: 10},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 1, start: 11, end: 12},
+      },
+      {
+        value: '1000',
+        type: 'Number',
+        position: {line: 1, start: 13, end: 17},
+      },
+      {
+        value: 'incomeF',
+        type: 'Identifier',
+        position: {line: 2, start: 4, end: 11},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 2, start: 12, end: 13},
+      },
+      {
+        value: '2000',
+        type: 'Number',
+        position: {line: 2, start: 14, end: 18},
+      },
+      {
+        value: 'result',
+        type: 'Identifier',
+        position: {line: 4, start: 4, end: 10},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 4, start: 11, end: 12},
+      },
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 4, start: 13, end: 19},
+      },
+      {
+        value: '+',
+        type: 'BinaryOperator',
+        position: {line: 4, start: 20, end: 21},
+      },
+      {
+        value: 'incomeF',
+        type: 'Identifier',
+        position: {line: 4, start: 22, end: 29},
+      },
+      {
+        value: '#',
+        type: 'Hash',
+        position: {line: 4, start: 30, end: 31},
+      },
       {value: 'EOF', type: 'EOF'},
     ])
   })
@@ -88,22 +228,86 @@ describe('tokenize', () => {
     `
 
     expect(tokenize(src)).toEqual([
-      {value: 'income', type: 'Identifier', line: 1, position: 10},
-      {value: '=', type: 'Equals', line: 1, position: 12},
-      {value: '1000', type: 'Number', line: 1, position: 17},
-      {value: 'incomeF', type: 'Identifier', line: 2, position: 11},
-      {value: '=', type: 'Equals', line: 2, position: 13},
-      {value: '2000', type: 'Number', line: 2, position: 18},
-      {value: 'incomeR', type: 'Identifier', line: 3, position: 11},
-      {value: '=', type: 'Equals', line: 3, position: 13},
-      {value: '2000', type: 'Number', line: 3, position: 18},
-      {value: 'result', type: 'Identifier', line: 5, position: 10},
-      {value: '=', type: 'Equals', line: 5, position: 12},
-      {value: 'income', type: 'Identifier', line: 5, position: 19},
-      {value: '+', type: 'BinaryOperator', line: 5, position: 21},
-      {value: 'incomeF', type: 'Identifier', line: 5, position: 29},
-      {value: '+', type: 'BinaryOperator', line: 5, position: 31},
-      {value: 'incomeR', type: 'Identifier', line: 5, position: 39},
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 1, start: 4, end: 10},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 1, start: 11, end: 12},
+      },
+      {
+        value: '1000',
+        type: 'Number',
+        position: {line: 1, start: 13, end: 17},
+      },
+      {
+        value: 'incomeF',
+        type: 'Identifier',
+        position: {line: 2, start: 4, end: 11},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 2, start: 12, end: 13},
+      },
+      {
+        value: '2000',
+        type: 'Number',
+        position: {line: 2, start: 14, end: 18},
+      },
+      {
+        value: 'incomeR',
+        type: 'Identifier',
+        position: {line: 3, start: 4, end: 11},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 3, start: 12, end: 13},
+      },
+      {
+        value: '2000',
+        type: 'Number',
+        position: {line: 3, start: 14, end: 18},
+      },
+      {
+        value: 'result',
+        type: 'Identifier',
+        position: {line: 5, start: 4, end: 10},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 5, start: 11, end: 12},
+      },
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 5, start: 13, end: 19},
+      },
+      {
+        value: '+',
+        type: 'BinaryOperator',
+        position: {line: 5, start: 20, end: 21},
+      },
+      {
+        value: 'incomeF',
+        type: 'Identifier',
+        position: {line: 5, start: 22, end: 29},
+      },
+      {
+        value: '+',
+        type: 'BinaryOperator',
+        position: {line: 5, start: 30, end: 31},
+      },
+      {
+        value: 'incomeR',
+        type: 'Identifier',
+        position: {line: 5, start: 32, end: 39},
+      },
       {value: 'EOF', type: 'EOF'},
     ])
   })
@@ -112,13 +316,41 @@ describe('tokenize', () => {
     const src = `income = (1000 + 10)`
 
     expect(tokenize(src)).toEqual([
-      {value: 'income', type: 'Identifier', line: 0, position: 6},
-      {value: '=', type: 'Equals', line: 0, position: 8},
-      {value: '(', type: 'OpenParenthesis', line: 0, position: 10},
-      {value: '1000', type: 'Number', line: 0, position: 14},
-      {value: '+', type: 'BinaryOperator', line: 0, position: 16},
-      {value: '10', type: 'Number', line: 0, position: 19},
-      {value: ')', type: 'CloseParenthesis', line: 0, position: 20},
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        value: '(',
+        type: 'OpenParenthesis',
+        position: {line: 0, start: 9, end: 10},
+      },
+      {
+        value: '1000',
+        type: 'Number',
+        position: {line: 0, start: 10, end: 14},
+      },
+      {
+        value: '+',
+        type: 'BinaryOperator',
+        position: {line: 0, start: 15, end: 16},
+      },
+      {
+        value: '10',
+        type: 'Number',
+        position: {line: 0, start: 17, end: 19},
+      },
+      {
+        value: ')',
+        type: 'CloseParenthesis',
+        position: {line: 0, start: 19, end: 20},
+      },
       {value: 'EOF', type: 'EOF'},
     ])
   })
@@ -130,19 +362,16 @@ describe('tokenize', () => {
       {
         value: 'asd',
         type: 'Identifier',
-        line: 0,
-        position: 3,
+
+        position: {line: 0, start: 0, end: 3},
       },
       {
         value: '=',
         type: 'Equals',
-        line: 0,
-        position: 5,
+
+        position: {line: 0, start: 4, end: 5},
       },
-      {
-        value: 'EOF',
-        type: 'EOF',
-      },
+      {value: 'EOF', type: 'EOF'},
     ])
   })
 })
