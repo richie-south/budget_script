@@ -175,7 +175,8 @@ export function tokenize(sourceCode: string): Token[] {
         position = 0
         chars.shift()
       } else {
-        throw new Error(`Unrecognized character: ${chars[0]}`)
+        position += 1
+        chars.shift()
       }
     }
   }
