@@ -2,6 +2,8 @@
 
 A live "scripting language" made for budget calculations, higly inspired by Apple math notes.
 
+Try it on https://richie-south.github.io/budget_script/
+
 **Variables**
 
 To create a variable you place a `=` before a uniq name.
