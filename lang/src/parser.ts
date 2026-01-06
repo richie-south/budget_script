@@ -13,7 +13,11 @@ import {
 import {tokenFactory, TokenFactory} from './token_factory'
 
 type Base = {
-  line: number
+  position: {
+    line: number
+    start: number
+    end: number
+  }
 }
 
 export const IDENTIFIER = 'Identifier'
@@ -80,19 +84,19 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
       return {
         type: IDENTIFIER,
         symbol: tokens.next().value,
-        line: token.line,
+        position: token.position,
       }
     case lex_NUMBER:
       return {
         type: NUMERIC_LITERAL,
         value: parseFloat(tokens.next().value),
-        line: token.line,
+        position: token.position,
       }
     case lex_HASH:
       tokens.next()
       return {
         type: OUTPUT_EXPRESSION,
-        line: token.line,
+        position: token.position,
       }
     case lex_OPEN_PARENTHESIS:
       tokens.next()
@@ -102,8 +106,8 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
         ')',
         new ParseError(
           `Missing closing parenthesis`,
-          tokens.at().line,
-          tokens.at().position,
+          tokens.at().position.line,
+          tokens.at().position.start,
         ),
       )
       tokens.next()
@@ -111,8 +115,8 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
     case lex_CLOSE_PARENTHESIS:
       throw new ParseError(
         `Missing open parenthesis`,
-        tokens.at().line,
-        tokens.at().position,
+        tokens.at().position.line,
+        tokens.at().position.start,
       )
   }
 }
@@ -123,7 +127,7 @@ function parseMultiplicativeExpr(tokens: TokenFactory) {
       tokens.at().type === lex_BINARY_OPERATOR &&
       (tokens.at().value === '*' || tokens.at().value === '/')
     ) {
-      const line = tokens.at().line
+      const position = tokens.at().position
       const operator = tokens.next().value
 
       const right = parseExpresion(tokens)
@@ -133,7 +137,7 @@ function parseMultiplicativeExpr(tokens: TokenFactory) {
         left,
         right,
         operator,
-        line,
+        position,
       }
     }
 
@@ -147,7 +151,7 @@ function parseAdditiveExpr(tokens: TokenFactory) {
       tokens.at().type === lex_BINARY_OPERATOR &&
       (tokens.at().value === '+' || tokens.at().value === '-')
     ) {
-      const line = tokens.at().line
+      const position = tokens.at().position
       const operator = tokens.next().value
 
       const right = parseExpresion(tokens)
@@ -156,7 +160,7 @@ function parseAdditiveExpr(tokens: TokenFactory) {
         left,
         right,
         operator,
-        line,
+        position,
       }
     }
 
@@ -167,7 +171,7 @@ function parseAdditiveExpr(tokens: TokenFactory) {
 function parseAssignmentExpresion(tokens: TokenFactory) {
   return (left?: Expression): Expression => {
     if (tokens.at().type === lex_EQUALS) {
-      const line = tokens.at().line
+      const position = tokens.at().position
       const operator = tokens.at().value
       tokens.next()
 
@@ -178,7 +182,7 @@ function parseAssignmentExpresion(tokens: TokenFactory) {
         type: ASSIGNMENT_EXPRESSION,
         assignee: left,
         operator,
-        line,
+        position,
       }
     }
 

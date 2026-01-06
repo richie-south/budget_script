@@ -9,8 +9,6 @@ describe('parser', () => {
     result = income + incomeF #
     `
 
-    /* console.log('p', JSON.stringify(parser(src), null, 2)) */
-
     expect(parser(src)).toEqual({
       type: 'Program',
       body: [
@@ -18,31 +16,55 @@ describe('parser', () => {
           value: {
             type: 'NumericLiteral',
             value: 1000,
-            line: 1,
+            position: {
+              line: 1,
+              start: 13,
+              end: 17,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'income',
-            line: 1,
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
           },
           operator: '=',
-          line: 1,
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
         },
         {
           value: {
             type: 'NumericLiteral',
             value: 2000,
-            line: 2,
+            position: {
+              line: 2,
+              start: 14,
+              end: 18,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'incomeF',
-            line: 2,
+            position: {
+              line: 2,
+              start: 4,
+              end: 11,
+            },
           },
           operator: '=',
-          line: 2,
+          position: {
+            line: 2,
+            start: 12,
+            end: 13,
+          },
         },
         {
           value: {
@@ -50,28 +72,52 @@ describe('parser', () => {
             left: {
               type: 'Identifier',
               symbol: 'income',
-              line: 4,
+              position: {
+                line: 4,
+                start: 13,
+                end: 19,
+              },
             },
             right: {
               type: 'Identifier',
               symbol: 'incomeF',
-              line: 4,
+              position: {
+                line: 4,
+                start: 22,
+                end: 29,
+              },
             },
             operator: '+',
-            line: 4,
+            position: {
+              line: 4,
+              start: 20,
+              end: 21,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'result',
-            line: 4,
+            position: {
+              line: 4,
+              start: 4,
+              end: 10,
+            },
           },
           operator: '=',
-          line: 4,
+          position: {
+            line: 4,
+            start: 11,
+            end: 12,
+          },
         },
         {
           type: 'OutputExpression',
-          line: 4,
+          position: {
+            line: 4,
+            start: 30,
+            end: 31,
+          },
         },
       ],
     })
@@ -82,8 +128,6 @@ describe('parser', () => {
     income = 1000 #
     `
 
-    /* console.log('p', JSON.stringify(parser(src), null, 2)) */
-
     expect(parser(src)).toEqual({
       type: 'Program',
       body: [
@@ -91,20 +135,36 @@ describe('parser', () => {
           value: {
             type: 'NumericLiteral',
             value: 1000,
-            line: 1,
+            position: {
+              line: 1,
+              start: 13,
+              end: 17,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'income',
-            line: 1,
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
           },
           operator: '=',
-          line: 1,
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
         },
         {
           type: 'OutputExpression',
-          line: 1,
+          position: {
+            line: 1,
+            start: 18,
+            end: 19,
+          },
         },
       ],
     })
@@ -128,32 +188,60 @@ describe('parser', () => {
               left: {
                 type: 'NumericLiteral',
                 value: 1000,
-                line: 1,
+                position: {
+                  line: 1,
+                  start: 14,
+                  end: 18,
+                },
               },
               right: {
                 type: 'NumericLiteral',
                 value: 10,
-                line: 1,
+                position: {
+                  line: 1,
+                  start: 21,
+                  end: 23,
+                },
               },
               operator: '+',
-              line: 1,
+              position: {
+                line: 1,
+                start: 19,
+                end: 20,
+              },
             },
             right: {
               type: 'NumericLiteral',
               value: 2,
-              line: 1,
+              position: {
+                line: 1,
+                start: 27,
+                end: 28,
+              },
             },
             operator: '*',
-            line: 1,
+            position: {
+              line: 1,
+              start: 25,
+              end: 26,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'income',
-            line: 1,
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
           },
           operator: '=',
-          line: 1,
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
         },
       ],
     })
@@ -168,8 +256,6 @@ describe('parser', () => {
     result = income + incomeF + incomeR
     `
 
-    /* console.log('p', JSON.stringify(parser(src), null, 2)) */
-
     expect(parser(src)).toEqual({
       type: 'Program',
       body: [
@@ -177,46 +263,82 @@ describe('parser', () => {
           value: {
             type: 'NumericLiteral',
             value: 1000,
-            line: 1,
+            position: {
+              line: 1,
+              start: 13,
+              end: 17,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'income',
-            line: 1,
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
           },
           operator: '=',
-          line: 1,
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
         },
         {
           value: {
             type: 'NumericLiteral',
             value: 2000,
-            line: 2,
+            position: {
+              line: 2,
+              start: 14,
+              end: 18,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'incomeF',
-            line: 2,
+            position: {
+              line: 2,
+              start: 4,
+              end: 11,
+            },
           },
           operator: '=',
-          line: 2,
+          position: {
+            line: 2,
+            start: 12,
+            end: 13,
+          },
         },
         {
           value: {
             type: 'NumericLiteral',
             value: 2000,
-            line: 3,
+            position: {
+              line: 3,
+              start: 14,
+              end: 18,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'incomeR',
-            line: 3,
+            position: {
+              line: 3,
+              start: 4,
+              end: 11,
+            },
           },
           operator: '=',
-          line: 3,
+          position: {
+            line: 3,
+            start: 12,
+            end: 13,
+          },
         },
         {
           value: {
@@ -224,34 +346,62 @@ describe('parser', () => {
             left: {
               type: 'Identifier',
               symbol: 'income',
-              line: 5,
+              position: {
+                line: 5,
+                start: 13,
+                end: 19,
+              },
             },
             right: {
               type: 'BinaryExpression',
               left: {
                 type: 'Identifier',
                 symbol: 'incomeF',
-                line: 5,
+                position: {
+                  line: 5,
+                  start: 22,
+                  end: 29,
+                },
               },
               right: {
                 type: 'Identifier',
                 symbol: 'incomeR',
-                line: 5,
+                position: {
+                  line: 5,
+                  start: 32,
+                  end: 39,
+                },
               },
               operator: '+',
-              line: 5,
+              position: {
+                line: 5,
+                start: 30,
+                end: 31,
+              },
             },
             operator: '+',
-            line: 5,
+            position: {
+              line: 5,
+              start: 20,
+              end: 21,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'result',
-            line: 5,
+            position: {
+              line: 5,
+              start: 4,
+              end: 10,
+            },
           },
           operator: '=',
-          line: 5,
+          position: {
+            line: 5,
+            start: 11,
+            end: 12,
+          },
         },
       ],
     })
@@ -270,31 +420,55 @@ describe('parser', () => {
           value: {
             type: 'NumericLiteral',
             value: 1000,
-            line: 1,
+            position: {
+              line: 1,
+              start: 13,
+              end: 17,
+            },
           },
           type: 'AssignmentExpression',
           assignee: {
             type: 'Identifier',
             symbol: 'income',
-            line: 1,
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
           },
           operator: '=',
-          line: 1,
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
         },
         {
           type: 'BinaryExpression',
           left: {
             type: 'Identifier',
             symbol: 'income',
-            line: 2,
+            position: {
+              line: 2,
+              start: 4,
+              end: 10,
+            },
           },
           right: {
             type: 'Identifier',
             symbol: 'asd',
-            line: 2,
+            position: {
+              line: 2,
+              start: 13,
+              end: 16,
+            },
           },
           operator: '+',
-          line: 2,
+          position: {
+            line: 2,
+            start: 11,
+            end: 12,
+          },
         },
       ],
     })
@@ -311,10 +485,18 @@ describe('parser', () => {
           assignee: {
             type: 'Identifier',
             symbol: 'asd',
-            line: 0,
+            position: {
+              line: 0,
+              start: 0,
+              end: 3,
+            },
           },
           operator: '=',
-          line: 0,
+          position: {
+            line: 0,
+            start: 4,
+            end: 5,
+          },
         },
       ],
     })
@@ -323,18 +505,25 @@ describe('parser', () => {
   it('print undefined', () => {
     const src = `asd #`
 
-    /* console.log('p', JSON.stringify(parser(src), null, 2)) */
     expect(parser(src)).toEqual({
       type: 'Program',
       body: [
         {
           type: 'Identifier',
           symbol: 'asd',
-          line: 0,
+          position: {
+            line: 0,
+            start: 0,
+            end: 3,
+          },
         },
         {
           type: 'OutputExpression',
-          line: 0,
+          position: {
+            line: 0,
+            start: 4,
+            end: 5,
+          },
         },
       ],
     })
