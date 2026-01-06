@@ -24,7 +24,7 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
     left = evaluateExpression(binary.left, env, {
       type: 'number',
       value: 0,
-      line: binary.line,
+      line: binary.position.line,
     })
   }
 
@@ -33,12 +33,17 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
     right = evaluateExpression(binary.right, env, {
       type: 'number',
       value: 0,
-      line: binary.line,
+      line: binary.position.line,
     })
   }
 
   if (left?.type === 'number' && right?.type === 'number') {
-    return evaluateNumericBinary(left, right, binary.operator, binary.line)
+    return evaluateNumericBinary(
+      left,
+      right,
+      binary.operator,
+      binary.position.line,
+    )
   }
 
   if (left) {
@@ -49,7 +54,7 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
     return right
   }
 
-  return {type: 'number', value: 0, line: binary.line}
+  return {type: 'number', value: 0, line: binary.position.line}
 }
 
 function evaluateNumericBinary(left, right, operator, line: number): Evaluated {
@@ -104,7 +109,7 @@ function evaluateAssignment(
   return {
     type: 'number',
     value: 0,
-    line: variable.line,
+    line: variable.position.line,
   }
 }
 
@@ -115,13 +120,17 @@ function evaluateExpression(
 ) {
   switch (expression.type) {
     case NUMERIC_LITERAL:
-      return {type: 'number', value: expression.value, line: expression.line}
+      return {
+        type: 'number',
+        value: expression.value,
+        line: expression.position.line,
+      }
 
     case BINARY_EXPRESSION:
       return evaluateBinary(expression, env)
 
     case ASSIGNMENT_EXPRESSION:
-      return evaluateAssignment(expression, env, expression.line)
+      return evaluateAssignment(expression, env, expression.position.line)
 
     case IDENTIFIER:
       return evaluateIdentifier(expression, env)
@@ -130,7 +139,7 @@ function evaluateExpression(
       return {
         value: lastEvaluated,
         type: 'print',
-        line: expression.line,
+        line: expression.position.line,
       }
 
     default:
@@ -141,7 +150,7 @@ function evaluateExpression(
 function wrap(expression: Expression, env: Env, lastEvaluated: Evaluated) {
   const result = evaluateExpression(expression, env, lastEvaluated)
   if (typeof result === 'number') {
-    return {value: result, type: 'number', line: expression.line}
+    return {value: result, type: 'number', line: expression.position.line}
   }
 
   return result
