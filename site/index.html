@@ -159,7 +159,7 @@
 
               for (const result of results) {
                 try {
-                  const line = view.state.doc.line(result.value.line + 1)
+                  const line = view.state.doc.line(result.line + 1)
                   widgets.push(
                     Decoration.widget({
                       widget: new AnnotationWidget(result.value.value),
