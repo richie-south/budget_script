@@ -67,56 +67,57 @@ describe('parser', () => {
           },
         },
         {
-          value: {
-            type: 'BinaryExpression',
-            left: {
-              type: 'Identifier',
-              symbol: 'income',
-              position: {
-                line: 4,
-                start: 13,
-                end: 19,
-              },
-            },
-            right: {
-              type: 'Identifier',
-              symbol: 'incomeF',
-              position: {
-                line: 4,
-                start: 22,
-                end: 29,
-              },
-            },
-            operator: '+',
-            position: {
-              line: 4,
-              start: 20,
-              end: 21,
-            },
-          },
-          type: 'AssignmentExpression',
-          assignee: {
-            type: 'Identifier',
-            symbol: 'result',
-            position: {
-              line: 4,
-              start: 4,
-              end: 10,
-            },
-          },
-          operator: '=',
-          position: {
-            line: 4,
-            start: 11,
-            end: 12,
-          },
-        },
-        {
           type: 'OutputExpression',
+          operator: '#',
           position: {
             line: 4,
             start: 30,
             end: 31,
+          },
+          expression: {
+            value: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'Identifier',
+                symbol: 'income',
+                position: {
+                  line: 4,
+                  start: 13,
+                  end: 19,
+                },
+              },
+              right: {
+                type: 'Identifier',
+                symbol: 'incomeF',
+                position: {
+                  line: 4,
+                  start: 22,
+                  end: 29,
+                },
+              },
+              operator: '+',
+              position: {
+                line: 4,
+                start: 20,
+                end: 21,
+              },
+            },
+            type: 'AssignmentExpression',
+            assignee: {
+              type: 'Identifier',
+              symbol: 'result',
+              position: {
+                line: 4,
+                start: 4,
+                end: 10,
+              },
+            },
+            operator: '=',
+            position: {
+              line: 4,
+              start: 11,
+              end: 12,
+            },
           },
         },
       ],
@@ -125,45 +126,64 @@ describe('parser', () => {
 
   it('parse', () => {
     const src = `
-    income = 1000 #
+    income = 1000 + 100 #
     `
 
     expect(parser(src)).toEqual({
       type: 'Program',
       body: [
         {
-          value: {
-            type: 'NumericLiteral',
-            value: 1000,
-            position: {
-              line: 1,
-              start: 13,
-              end: 17,
-            },
-          },
-          type: 'AssignmentExpression',
-          assignee: {
-            type: 'Identifier',
-            symbol: 'income',
-            position: {
-              line: 1,
-              start: 4,
-              end: 10,
-            },
-          },
-          operator: '=',
-          position: {
-            line: 1,
-            start: 11,
-            end: 12,
-          },
-        },
-        {
           type: 'OutputExpression',
+          operator: '#',
           position: {
             line: 1,
-            start: 18,
-            end: 19,
+            start: 24,
+            end: 25,
+          },
+          expression: {
+            value: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'NumericLiteral',
+                value: 1000,
+                position: {
+                  line: 1,
+                  start: 13,
+                  end: 17,
+                },
+              },
+              right: {
+                type: 'NumericLiteral',
+                value: 100,
+                position: {
+                  line: 1,
+                  start: 20,
+                  end: 23,
+                },
+              },
+              operator: '+',
+              position: {
+                line: 1,
+                start: 18,
+                end: 19,
+              },
+            },
+            type: 'AssignmentExpression',
+            assignee: {
+              type: 'Identifier',
+              symbol: 'income',
+              position: {
+                line: 1,
+                start: 4,
+                end: 10,
+              },
+            },
+            operator: '=',
+            position: {
+              line: 1,
+              start: 11,
+              end: 12,
+            },
           },
         },
       ],
@@ -509,6 +529,331 @@ describe('parser', () => {
       type: 'Program',
       body: [
         {
+          type: 'OutputExpression',
+          operator: '#',
+          position: {
+            line: 0,
+            start: 4,
+            end: 5,
+          },
+          expression: {
+            type: 'Identifier',
+            symbol: 'asd',
+            position: {
+              line: 0,
+              start: 0,
+              end: 3,
+            },
+          },
+        },
+      ],
+    })
+  })
+
+  it('parse subtraction', () => {
+    const src = `
+    income = 1000 - 10
+    `
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          value: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'NumericLiteral',
+              value: 1000,
+              position: {
+                line: 1,
+                start: 13,
+                end: 17,
+              },
+            },
+            right: {
+              type: 'NumericLiteral',
+              value: 10,
+              position: {
+                line: 1,
+                start: 20,
+                end: 22,
+              },
+            },
+            operator: '-',
+            position: {
+              line: 1,
+              start: 18,
+              end: 19,
+            },
+          },
+          type: 'AssignmentExpression',
+          assignee: {
+            type: 'Identifier',
+            symbol: 'income',
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
+        },
+      ],
+    })
+  })
+
+  it('parse UnaryExpression', () => {
+    const src = `
+    income = -1000
+    `
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          value: {
+            type: 'UnaryExpression',
+            operator: '-',
+            argument: {
+              type: 'NumericLiteral',
+              value: 1000,
+              position: {
+                line: 1,
+                start: 14,
+                end: 18,
+              },
+            },
+            position: {
+              line: 1,
+              start: 13,
+              end: 14,
+            },
+          },
+          type: 'AssignmentExpression',
+          assignee: {
+            type: 'Identifier',
+            symbol: 'income',
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
+        },
+      ],
+    })
+  })
+
+  it('parse unfinished UnaryExpression', () => {
+    const src = `
+    income = -
+    `
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          value: {
+            type: 'UnaryExpression',
+            operator: '-',
+            position: {
+              line: 1,
+              start: 13,
+              end: 14,
+            },
+          },
+          type: 'AssignmentExpression',
+          assignee: {
+            type: 'Identifier',
+            symbol: 'income',
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
+        },
+      ],
+    })
+  })
+
+  it('parse unfinished UnaryExpression identifier operation', () => {
+    const src = `
+    asd = -
+    två = 10
+    asd + två #
+    `
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          value: {
+            value: {
+              type: 'NumericLiteral',
+              value: 10,
+              position: {
+                line: 2,
+                start: 10,
+                end: 12,
+              },
+            },
+            type: 'AssignmentExpression',
+            assignee: {
+              type: 'UnaryExpression',
+              operator: '-',
+              argument: {
+                type: 'Identifier',
+                symbol: 'två',
+                position: {
+                  line: 2,
+                  start: 4,
+                  end: 7,
+                },
+              },
+              position: {
+                line: 1,
+                start: 10,
+                end: 11,
+              },
+            },
+            operator: '=',
+            position: {
+              line: 2,
+              start: 8,
+              end: 9,
+            },
+          },
+          type: 'AssignmentExpression',
+          assignee: {
+            type: 'Identifier',
+            symbol: 'asd',
+            position: {
+              line: 1,
+              start: 4,
+              end: 7,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 8,
+            end: 9,
+          },
+        },
+        {
+          type: 'OutputExpression',
+          operator: '#',
+          position: {
+            line: 3,
+            start: 14,
+            end: 15,
+          },
+          expression: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'Identifier',
+              symbol: 'asd',
+              position: {
+                line: 3,
+                start: 4,
+                end: 7,
+              },
+            },
+            right: {
+              type: 'Identifier',
+              symbol: 'två',
+              position: {
+                line: 3,
+                start: 10,
+                end: 13,
+              },
+            },
+            operator: '+',
+            position: {
+              line: 3,
+              start: 8,
+              end: 9,
+            },
+          },
+        },
+      ],
+    })
+  })
+
+  it('print progress function', () => {
+    const src = `#progress asd kingen`
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'OutputExpression',
+          operator: '#',
+          callee: {
+            type: 'Identifier',
+            symbol: 'progress',
+            position: {
+              line: 0,
+              start: 1,
+              end: 9,
+            },
+          },
+          arguments: [
+            {
+              type: 'Identifier',
+              symbol: 'asd',
+              position: {
+                line: 0,
+                start: 10,
+                end: 13,
+              },
+            },
+            {
+              type: 'Identifier',
+              symbol: 'kingen',
+              position: {
+                line: 0,
+                start: 14,
+                end: 20,
+              },
+            },
+          ],
+          position: {
+            line: 0,
+            start: 0,
+            end: 1,
+          },
+        },
+      ],
+    })
+  })
+
+  it.skip('print progress from previous', () => {
+    const src = `asd kingen #progress`
+
+    /* console.log('parser(src)', JSON.stringify(parser(src), null, 2)) */
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
           type: 'Identifier',
           symbol: 'asd',
           position: {
@@ -519,10 +864,104 @@ describe('parser', () => {
         },
         {
           type: 'OutputExpression',
+          operator: '#',
+          callee: {
+            type: 'Identifier',
+            symbol: 'progress',
+            position: {
+              line: 0,
+              start: 12,
+              end: 20,
+            },
+          },
+          arguments: [],
           position: {
             line: 0,
-            start: 4,
-            end: 5,
+            start: 11,
+            end: 12,
+          },
+          expression: {
+            type: 'Identifier',
+            symbol: 'kingen',
+            position: {
+              line: 0,
+              start: 4,
+              end: 10,
+            },
+          },
+        },
+      ],
+    })
+  })
+
+  it('print progress', () => {
+    const src = `asd = 100 #
+    kingen = 200`
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'OutputExpression',
+          operator: '#',
+          position: {
+            line: 0,
+            start: 10,
+            end: 11,
+          },
+          expression: {
+            value: {
+              type: 'NumericLiteral',
+              value: 100,
+              position: {
+                line: 0,
+                start: 6,
+                end: 9,
+              },
+            },
+            type: 'AssignmentExpression',
+            assignee: {
+              type: 'Identifier',
+              symbol: 'asd',
+              position: {
+                line: 0,
+                start: 0,
+                end: 3,
+              },
+            },
+            operator: '=',
+            position: {
+              line: 0,
+              start: 4,
+              end: 5,
+            },
+          },
+        },
+        {
+          value: {
+            type: 'NumericLiteral',
+            value: 200,
+            position: {
+              line: 1,
+              start: 13,
+              end: 16,
+            },
+          },
+          type: 'AssignmentExpression',
+          assignee: {
+            type: 'Identifier',
+            symbol: 'kingen',
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
           },
         },
       ],
