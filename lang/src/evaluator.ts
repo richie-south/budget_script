@@ -1,4 +1,5 @@
 import {Env} from './environment'
+import {EvaluatorError} from './errors'
 import {
   AssignmentExpression,
   BinaryExpression,
@@ -10,19 +11,33 @@ import {
   BINARY_EXPRESSION,
   ASSIGNMENT_EXPRESSION,
   OUTPUT_EXPRESSION,
+  UNARY_EXPRESSION,
+  UnaryExpression,
 } from './parser'
 
-type Evaluated = {
-  type: string
-  value: string | number
+const NUMBER = 'number'
+const PRINT = 'print'
+const PROGRESS = 'progress'
+
+type Progress = {
+  type: typeof PROGRESS
+  value: number[]
   line: number
 }
+
+type Evaluated =
+  | {
+      type: typeof NUMBER | typeof PRINT
+      value: string | number
+      line: number
+    }
+  | Progress
 
 function evaluateBinary(binary: BinaryExpression, env: Env) {
   let left
   if (binary.left) {
     left = evaluateExpression(binary.left, env, {
-      type: 'number',
+      type: NUMBER,
       value: 0,
       line: binary.position.line,
     })
@@ -31,13 +46,13 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
   let right
   if (binary.right) {
     right = evaluateExpression(binary.right, env, {
-      type: 'number',
+      type: NUMBER,
       value: 0,
       line: binary.position.line,
     })
   }
 
-  if (left?.type === 'number' && right?.type === 'number') {
+  if (left?.type === NUMBER && right?.type === NUMBER) {
     return evaluateNumericBinary(
       left,
       right,
@@ -54,7 +69,7 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
     return right
   }
 
-  return {type: 'number', value: 0, line: binary.position.line}
+  return {type: NUMBER, value: 0, line: binary.position.line}
 }
 
 function evaluateNumericBinary(left, right, operator, line: number): Evaluated {
@@ -79,7 +94,7 @@ function evaluateNumericBinary(left, right, operator, line: number): Evaluated {
     res = left.value % right.value
   }
 
-  return {value: res, type: 'number', line}
+  return {value: res, type: NUMBER, line}
 }
 
 function evaluateIdentifier(identifier: Identifier, env: Env) {
@@ -92,14 +107,18 @@ function evaluateAssignment(
   env: Env,
   line: number,
 ) {
-  if (variable.assignee.type !== IDENTIFIER) {
-    throw 'Invalid assignment indentifier variable'
+  if (!variable.assignee || variable.assignee.type !== IDENTIFIER) {
+    throw new EvaluatorError(
+      'Invalid assignment indentifier variable',
+      variable.position.line,
+      variable.position.start,
+    )
   }
 
   if (variable.value) {
     const value = evaluateExpression(variable.value, env, {
-      type: 'null',
-      value: null,
+      type: NUMBER,
+      value: 0,
       line,
     })
 
@@ -107,9 +126,19 @@ function evaluateAssignment(
   }
 
   return {
-    type: 'number',
+    type: NUMBER,
     value: 0,
     line: variable.position.line,
+  }
+}
+
+function evaluateUnary(unary: UnaryExpression, env: Env) {
+  if (unary.argument && unary.argument.type === 'NumericLiteral') {
+    return {
+      type: NUMBER,
+      value: -unary.argument.value,
+      line: unary.position.line,
+    }
   }
 }
 
@@ -121,7 +150,7 @@ function evaluateExpression(
   switch (expression.type) {
     case NUMERIC_LITERAL:
       return {
-        type: 'number',
+        type: NUMBER,
         value: expression.value,
         line: expression.position.line,
       }
@@ -135,22 +164,67 @@ function evaluateExpression(
     case IDENTIFIER:
       return evaluateIdentifier(expression, env)
 
+    case UNARY_EXPRESSION:
+      return evaluateUnary(expression, env)
+
     case OUTPUT_EXPRESSION:
+      if (expression.expression) {
+        let evaluated = evaluateExpression(
+          expression.expression,
+          env,
+          lastEvaluated,
+        )
+        if (typeof evaluated === NUMBER) {
+          evaluated = {
+            value: evaluated,
+            type: NUMBER,
+            line: expression.position.line,
+          }
+        }
+        return {
+          value: evaluated,
+          type: PRINT,
+          line: expression.position.line,
+        }
+      }
+
+      if (expression.callee) {
+        const args = []
+        for (const argument of expression.arguments) {
+          let evaluated = evaluateExpression(argument, env, lastEvaluated)
+
+          if (typeof evaluated === NUMBER) {
+            evaluated = {
+              value: evaluated,
+              type: NUMBER,
+              line: expression.position.line,
+            }
+          }
+
+          args.push(evaluated)
+        }
+        return {
+          type: PROGRESS,
+          value: args,
+          line: expression.position.line,
+        }
+      }
+
       return {
         value: lastEvaluated,
-        type: 'print',
+        type: PRINT,
         line: expression.position.line,
       }
 
     default:
-      throw `Unrecognized AST Node: ${JSON.stringify(expression, null, 2)}`
+      throw new EvaluatorError('Unrecognized AST Node: ', 0, 0)
   }
 }
 
 function wrap(expression: Expression, env: Env, lastEvaluated: Evaluated) {
   const result = evaluateExpression(expression, env, lastEvaluated)
-  if (typeof result === 'number') {
-    return {value: result, type: 'number', line: expression.position.line}
+  if (typeof result === NUMBER) {
+    return {value: result, type: NUMBER, line: expression.position.line}
   }
 
   return result
@@ -159,7 +233,7 @@ function wrap(expression: Expression, env: Env, lastEvaluated: Evaluated) {
 export function evaluate(ast: AST, env: Env) {
   if (ast.type === 'Program') {
     const evaluated = []
-    let lastEvaluated = {type: 'null', value: 0, line: 0}
+    let lastEvaluated: Evaluated = {type: NUMBER, value: 0, line: 0}
     for (const statement of ast.body) {
       lastEvaluated = wrap(statement, env, lastEvaluated)
 
@@ -168,5 +242,5 @@ export function evaluate(ast: AST, env: Env) {
     return evaluated
   }
 
-  throw `Unrecognized AST Node: ${ast}`
+  throw new EvaluatorError('Unrecognized AST Node: ', 0, 0)
 }
