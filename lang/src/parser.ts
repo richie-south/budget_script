@@ -9,6 +9,7 @@ import {
   lex_CLOSE_PARENTHESIS,
   lex_BINARY_OPERATOR,
   lex_EQUALS,
+  lex_EOF,
 } from './lexer'
 import {tokenFactory, TokenFactory} from './token_factory'
 
@@ -51,6 +52,17 @@ export type AssignmentExpression = {
 export const OUTPUT_EXPRESSION = 'OutputExpression'
 export type OutputExpression = {
   type: typeof OUTPUT_EXPRESSION
+  operator: string
+  arguments?: Expression[]
+  callee?: Expression
+  expression: Expression
+} & Base
+
+export const UNARY_EXPRESSION = 'UnaryExpression'
+export type UnaryExpression = {
+  type: typeof UNARY_EXPRESSION
+  argument: Expression
+  operator: string
 } & Base
 
 export type Expression =
@@ -59,6 +71,7 @@ export type Expression =
   | BinaryExpression
   | AssignmentExpression
   | OutputExpression
+  | UnaryExpression
 
 export type AST = {type: 'Program'; body: Expression[]}
 
@@ -81,21 +94,17 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
 
   switch (token.type) {
     case lex_IDENTIFIER:
+      tokens.next()
       return {
         type: IDENTIFIER,
-        symbol: tokens.next().value,
+        symbol: token.value,
         position: token.position,
       }
     case lex_NUMBER:
-      return {
-        type: NUMERIC_LITERAL,
-        value: parseFloat(tokens.next().value),
-        position: token.position,
-      }
-    case lex_HASH:
       tokens.next()
       return {
-        type: OUTPUT_EXPRESSION,
+        type: NUMERIC_LITERAL,
+        value: parseFloat(token.value),
         position: token.position,
       }
     case lex_OPEN_PARENTHESIS:
@@ -121,7 +130,33 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
   }
 }
 
-function parseMultiplicativeExpr(tokens: TokenFactory) {
+function parseUnaryExpression(tokens: TokenFactory): Expression {
+  if (tokens.at().type === lex_BINARY_OPERATOR && tokens.at().value === '-') {
+    const token = tokens.next()
+    const argument = parseUnaryExpression(tokens)
+
+    return {
+      type: UNARY_EXPRESSION,
+      operator: token.value,
+      argument: argument,
+      position: token.position,
+    }
+  }
+
+  return parsePrimaryExpression(tokens)
+}
+
+function parseArguments(tokens: TokenFactory, line: number): Expression[] {
+  const args: Expression[] = []
+  while (tokens.at().type !== lex_EOF && tokens.at().position.line === line) {
+    const callee = parsePrimaryExpression(tokens)
+    args.push(callee)
+  }
+
+  return args
+}
+
+function parseMultiplicativeExpresion(tokens: TokenFactory) {
   return (left?: Expression): Expression => {
     if (
       tokens.at().type === lex_BINARY_OPERATOR &&
@@ -145,7 +180,7 @@ function parseMultiplicativeExpr(tokens: TokenFactory) {
   }
 }
 
-function parseAdditiveExpr(tokens: TokenFactory) {
+function parseAdditiveExpresion(tokens: TokenFactory) {
   return (left?: Expression): Expression => {
     if (
       tokens.at().type === lex_BINARY_OPERATOR &&
@@ -190,20 +225,83 @@ function parseAssignmentExpresion(tokens: TokenFactory) {
   }
 }
 
+function parseOutputExpression(
+  tokens: TokenFactory,
+): OutputExpression | undefined {
+  if (tokens.at().type === lex_HASH) {
+    const token = tokens.at()
+    tokens.next()
+    const callee = parsePrimaryExpression(tokens)
+
+    if (
+      callee &&
+      callee.position.line === token.position.line &&
+      callee.type === lex_IDENTIFIER
+    ) {
+      return {
+        type: OUTPUT_EXPRESSION,
+        operator: token.value,
+        callee,
+        arguments: parseArguments(tokens, token.position.line),
+        position: token.position,
+        expression: undefined,
+      }
+    }
+
+    if (callee) {
+      tokens.previous()
+    }
+
+    return {
+      type: OUTPUT_EXPRESSION,
+      operator: token.value,
+      position: token.position,
+      expression: undefined,
+    }
+  }
+}
+
+function isSameLine(expression: Expression, nextToken: Token) {
+  if (!expression || !nextToken || nextToken.type === lex_EOF) {
+    return false
+  }
+  return expression.position.line === nextToken.position.line
+}
+
 function parseExpresion(tokens: TokenFactory): Expression {
   return pipe(
-    parsePrimaryExpression(tokens),
-    parseMultiplicativeExpr(tokens),
-    parseAdditiveExpr(tokens),
+    parseUnaryExpression(tokens),
+    parseMultiplicativeExpresion(tokens),
+    parseAdditiveExpresion(tokens),
     parseAssignmentExpresion(tokens),
   )
+}
+
+function parse(tokens: TokenFactory): Expression {
+  const output = parseOutputExpression(tokens)
+  if (output) {
+    return output
+  }
+
+  const data = parseExpresion(tokens)
+
+  if (isSameLine(data, tokens.at())) {
+    const output = parseOutputExpression(tokens)
+    if (output) {
+      output.expression = data
+
+      return output
+    }
+  }
+
+  return data
 }
 
 function parseStatement(tokens: TokenFactory) {
   const tokenType = tokens.at().type
   switch (tokenType) {
     default:
-      return parseExpresion(tokens)
+      return parse(tokens)
   }
 }
 
