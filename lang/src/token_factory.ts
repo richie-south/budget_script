@@ -2,7 +2,7 @@ import {Token} from './lexer'
 
 export type TokenFactory = ReturnType<typeof tokenFactory>
 export function tokenFactory(to: Token[]) {
-  const tokens: Token[] = [...to]
+  let tokens: Token[] = [...to]
   const prev: Token[] = []
 
   function at(): Token {
@@ -14,8 +14,20 @@ export function tokenFactory(to: Token[]) {
     return tokens.shift()
   }
 
+  function previous(): undefined {
+    if (prev[prev.length - 1]) {
+      tokens = [prev[prev.length - 1], ...tokens]
+    }
+  }
+
+  function peek(): Token {
+    return tokens[1]
+  }
+
   return {
     at,
     next,
+    peek,
+    previous,
   }
 }
