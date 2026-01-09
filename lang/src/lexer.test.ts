@@ -218,6 +218,32 @@ describe('tokenize', () => {
     ])
   })
 
+  it('hash identifier', () => {
+    const src = `
+    #progress sparat mål
+    `
+
+    expect(tokenize(src)).toEqual([
+      {value: '#', type: 'Hash', position: {line: 1, start: 4, end: 5}},
+      {
+        value: 'progress',
+        type: 'Identifier',
+        position: {line: 1, start: 5, end: 13},
+      },
+      {
+        value: 'sparat',
+        type: 'Identifier',
+        position: {line: 1, start: 14, end: 20},
+      },
+      {
+        value: 'mål',
+        type: 'Identifier',
+        position: {line: 1, start: 21, end: 24},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
   it('Multible Binary operators for identifiers', () => {
     const src = `
     income = 1000
