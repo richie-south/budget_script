@@ -2,7 +2,11 @@ export function enviroment() {
   const variables = new Map<string, number>()
 
   function assignVariable(variable: string, value: number) {
+    if (!value) {
+      value = 0
+    }
     variables.set(variable, value)
+
     return value
   }
 
