@@ -3,12 +3,86 @@ import {evaluate} from './evaluator'
 import {parser} from './parser'
 
 describe('evaluator', () => {
-  it('evaluate', () => {
+  it('variable', () => {
+    const src = `
+    income = 1000
+    `
+
+    const env = enviroment()
+    const ast = parser(src)
+
+    expect(evaluate(ast, env)).toEqual([
+      {
+        type: 'number',
+        value: 1000,
+        line: 1,
+      },
+    ])
+  })
+
+  it('output variable', () => {
+    const src = `
+    income = 1000 #
+    `
+
+    const env = enviroment()
+    const ast = parser(src)
+
+    expect(evaluate(ast, env)).toEqual([
+      {
+        value: {
+          type: 'number',
+          value: 1000,
+          line: 1,
+        },
+        type: 'print',
+        line: 1,
+      },
+    ])
+  })
+
+  it('output variable sum', () => {
+    const src = `
+    incomeA = 1000
+    incomeB = 2000
+
+    incomeA + incomeB #
+    `
+
+    const env = enviroment()
+    const ast = parser(src)
+
+    expect(evaluate(ast, env)).toEqual([
+      {
+        type: 'number',
+        value: 1000,
+        line: 1,
+      },
+      {
+        type: 'number',
+        value: 2000,
+        line: 2,
+      },
+      {
+        value: {
+          value: 3000,
+          type: 'number',
+          line: 4,
+        },
+        type: 'print',
+        line: 4,
+      },
+    ])
+  })
+
+  it('output result from variable', () => {
     const src = `
     income = 1000
     incomeF = 2000
 
     result = income + incomeF
+
+    result #
     `
 
     const env = enviroment()
@@ -30,10 +104,19 @@ describe('evaluator', () => {
         type: 'number',
         line: 4,
       },
+      {
+        value: {
+          value: 3000,
+          type: 'number',
+          line: 4,
+        },
+        type: 'print',
+        line: 6,
+      },
     ])
   })
 
-  it('evaluate output', () => {
+  it('evaluate result variable on same line ', () => {
     const src = `
     income = 1000
     incomeF = 2000
@@ -54,11 +137,6 @@ describe('evaluator', () => {
         type: 'number',
         value: 2000,
         line: 2,
-      },
-      {
-        value: 3000,
-        type: 'number',
-        line: 4,
       },
       {
         value: {
@@ -131,23 +209,19 @@ describe('evaluator', () => {
   })
 
   it('line left undefined', () => {
-    const src = `asd = 10
+    const src = `asd = 11
 ff + 10 #
     `
 
     const env = enviroment()
     const ast = parser(src)
 
-    expect(evaluate(ast, env)).toEqual([
+    const result = evaluate(ast, env)
+    expect(result).toEqual([
       {
         type: 'number',
-        value: 10,
+        value: 11,
         line: 0,
-      },
-      {
-        type: 'number',
-        value: 10,
-        line: 1,
       },
       {
         value: {
@@ -180,11 +254,6 @@ inkomst = inkomstA + inkomstB + asd #
         type: 'number',
         value: 500,
         line: 1,
-      },
-      {
-        value: 1500,
-        type: 'number',
-        line: 2,
       },
       {
         value: {
@@ -236,17 +305,91 @@ inkomst = inkomstA + inkomstB + asd #
 
     expect(evaluate(ast, env)).toEqual([
       {
-        value: 0,
-        type: 'number',
-        line: 0,
-      },
-      {
         value: {
           value: 0,
           type: 'number',
           line: 0,
         },
         type: 'print',
+        line: 0,
+      },
+    ])
+  })
+
+  it('parse subtraction', () => {
+    const src = `
+    income = 1000 - 10
+    `
+
+    const env = enviroment()
+    const ast = parser(src)
+
+    expect(evaluate(ast, env)).toEqual([
+      {
+        value: 990,
+        type: 'number',
+        line: 1,
+      },
+    ])
+  })
+
+  it('UnaryExpression', () => {
+    const src = `
+    income = -1000
+    `
+
+    const env = enviroment()
+    const ast = parser(src)
+
+    expect(evaluate(ast, env)).toEqual([
+      {
+        type: 'number',
+        value: -1000,
+        line: 1,
+      },
+    ])
+  })
+
+  it('incomplete UnaryExpression', () => {
+    const src = `
+    income = -
+    `
+
+    const env = enviroment()
+    const ast = parser(src)
+
+    expect(evaluate(ast, env)).toEqual([
+      {
+        value: 0,
+        type: 'number',
+        line: 1,
+      },
+    ])
+  })
+
+  it('progress function', () => {
+    const src = `#progress asd 100`
+
+    const env = enviroment()
+    const ast = parser(src)
+
+    console.log(JSON.stringify(ast, null, 2))
+    console.log(JSON.stringify(evaluate(ast, env), null, 2))
+    expect(evaluate(ast, env)).toEqual([
+      {
+        type: 'progress',
+        value: [
+          {
+            value: 0,
+            type: 'number',
+            line: 0,
+          },
+          {
+            type: 'number',
+            value: 100,
+            line: 0,
+          },
+        ],
         line: 0,
       },
     ])
