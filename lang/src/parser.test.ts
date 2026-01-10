@@ -967,4 +967,261 @@ describe('parser', () => {
       ],
     })
   })
+
+  it('UnitValue', () => {
+    const src = `income = 1000kr`
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          value: {
+            type: 'UnitExpression',
+            unit: 'kr',
+            value: 1000,
+            position: {
+              line: 0,
+              start: 9,
+              end: 15,
+            },
+          },
+          type: 'AssignmentExpression',
+          assignee: {
+            type: 'Identifier',
+            symbol: 'income',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('span Identifier', () => {
+    const src = `income = 1000kr /year`
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'UnitExpression',
+            unit: 'kr',
+            value: 1000,
+            position: {
+              line: 0,
+              start: 9,
+              end: 15,
+            },
+            span: {
+              type: 'SpanExpression',
+              value: 'year',
+              position: {
+                line: 0,
+                start: 16,
+                end: 21,
+              },
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'income',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('unknown span Identifier', () => {
+    const src = `income = 1000kr /unknown`
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'UnitExpression',
+              unit: 'kr',
+              value: 1000,
+              position: {
+                line: 0,
+                start: 9,
+                end: 15,
+              },
+            },
+            right: {
+              type: 'Identifier',
+              symbol: 'unknown',
+              position: {
+                line: 0,
+                start: 17,
+                end: 24,
+              },
+            },
+            operator: '/',
+            position: {
+              line: 0,
+              start: 16,
+              end: 17,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'income',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('progress span args', () => {
+    const src = `#predict income 3/year`
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'OutputExpression',
+          operator: '#',
+          callee: {
+            type: 'Identifier',
+            symbol: 'predict',
+            position: {
+              line: 0,
+              start: 1,
+              end: 8,
+            },
+          },
+          arguments: [
+            {
+              type: 'Identifier',
+              symbol: 'income',
+              position: {
+                line: 0,
+                start: 9,
+                end: 15,
+              },
+            },
+            {
+              type: 'NumericLiteral',
+              value: 3,
+              position: {
+                line: 0,
+                start: 16,
+                end: 17,
+              },
+              span: {
+                type: 'SpanExpression',
+                value: 'year',
+                position: {
+                  line: 0,
+                  start: 17,
+                  end: 22,
+                },
+              },
+            },
+          ],
+          position: {
+            line: 0,
+            start: 0,
+            end: 1,
+          },
+        },
+      ],
+    })
+  })
+
+  it('progress span args', () => {
+    const src = `#predict income 3/year`
+
+    /* console.log(JSON.stringify(parser(src), null, 2)) */
+
+    expect(parser(src)).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'OutputExpression',
+          operator: '#',
+          callee: {
+            type: 'Identifier',
+            symbol: 'predict',
+            position: {
+              line: 0,
+              start: 1,
+              end: 8,
+            },
+          },
+          arguments: [
+            {
+              type: 'Identifier',
+              symbol: 'income',
+              position: {
+                line: 0,
+                start: 9,
+                end: 15,
+              },
+            },
+            {
+              type: 'NumericLiteral',
+              value: 3,
+              position: {
+                line: 0,
+                start: 16,
+                end: 17,
+              },
+              span: {
+                type: 'SpanExpression',
+                value: 'year',
+                position: {
+                  line: 0,
+                  start: 17,
+                  end: 22,
+                },
+              },
+            },
+          ],
+          position: {
+            line: 0,
+            start: 0,
+            end: 1,
+          },
+        },
+      ],
+    })
+  })
 })
