@@ -400,4 +400,91 @@ describe('tokenize', () => {
       {value: 'EOF', type: 'EOF'},
     ])
   })
+
+  it('UnitValue', () => {
+    const src = `income = 1000kr`
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        type: 'UnitValue',
+        value: '1000',
+        unit: 'kr',
+        position: {line: 0, start: 9, end: 15},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('span Identifier', () => {
+    const src = `income = 1000kr /year`
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        type: 'UnitValue',
+        value: '1000',
+        unit: 'kr',
+        position: {line: 0, start: 9, end: 15},
+      },
+      {
+        type: 'Span',
+        value: 'year',
+        position: {line: 0, start: 16, end: 21},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('unknown span Identifier', () => {
+    const src = `income = 1000kr /unknown`
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        type: 'UnitValue',
+        value: '1000',
+        unit: 'kr',
+        position: {line: 0, start: 9, end: 15},
+      },
+      {
+        value: '/',
+        type: 'BinaryOperator',
+        position: {line: 0, start: 16, end: 17},
+      },
+      {
+        value: 'unknown',
+        type: 'Identifier',
+        position: {line: 0, start: 17, end: 24},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
 })
