@@ -1,5 +1,6 @@
 import {Env} from './environment'
 import {EvaluatorError} from './errors'
+import {lex_IDENTIFIER} from './lexer'
 import {
   AssignmentExpression,
   BinaryExpression,
@@ -13,11 +14,16 @@ import {
   OUTPUT_EXPRESSION,
   UNARY_EXPRESSION,
   UnaryExpression,
+  OutputExpression,
 } from './parser'
 
 const NUMBER = 'number'
 const PRINT = 'print'
 const PROGRESS = 'progress'
+const BAR_CHART = 'bar'
+const PIE_CHART = 'pie'
+const LINE_CHART = 'line'
+const PREDICT_CHART = 'predict'
 
 type Progress = {
   type: typeof PROGRESS
@@ -36,6 +42,8 @@ type Evaluated =
 function evaluateBinary(binary: BinaryExpression, env: Env) {
   let left
   if (binary.left) {
+    console.log('1')
+
     left = evaluateExpression(binary.left, env, {
       type: NUMBER,
       value: 0,
@@ -45,6 +53,8 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
 
   let right
   if (binary.right) {
+    console.log('here')
+
     right = evaluateExpression(binary.right, env, {
       type: NUMBER,
       value: 0,
@@ -53,6 +63,8 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
   }
 
   if (left?.type === NUMBER && right?.type === NUMBER) {
+    console.log('2')
+
     return evaluateNumericBinary(
       left,
       right,
@@ -68,6 +80,8 @@ function evaluateBinary(binary: BinaryExpression, env: Env) {
   if (right) {
     return right
   }
+
+  console.log('3')
 
   return {type: NUMBER, value: 0, line: binary.position.line}
 }
@@ -99,7 +113,18 @@ function evaluateNumericBinary(left, right, operator, line: number): Evaluated {
 
 function evaluateIdentifier(identifier: Identifier, env: Env) {
   const value = env.get(identifier.symbol)
-  return value
+  /* console.log('v', value) */
+  if (value) {
+    ;(value as any).identifier = identifier.symbol
+    return value
+  }
+
+  return {
+    type: 'number',
+    value: 0,
+    line: identifier.position.line,
+    identifier: identifier.symbol,
+  }
 }
 
 function evaluateAssignment(
@@ -139,6 +164,49 @@ function evaluateUnary(unary: UnaryExpression, env: Env) {
       value: -unary.argument.value,
       line: unary.position.line,
     }
+  }
+}
+
+function evaluateCalleePrint(
+  expression: Expression,
+  args: Expression[],
+  env: Env,
+) {
+  if (expression.type !== IDENTIFIER) {
+    return
+  }
+
+  switch (expression.symbol) {
+    case PROGRESS:
+      return {
+        type: PROGRESS,
+        value: args,
+        line: expression.position.line,
+      }
+    case BAR_CHART:
+      return {
+        type: BAR_CHART,
+        value: args,
+        line: expression.position.line,
+      }
+    case PIE_CHART:
+      return {
+        type: PIE_CHART,
+        value: args,
+        line: expression.position.line,
+      }
+    case LINE_CHART:
+      return {
+        type: LINE_CHART,
+        value: args,
+        line: expression.position.line,
+      }
+    case PREDICT_CHART:
+      return {
+        type: PREDICT_CHART,
+        value: args,
+        line: expression.position.line,
+      }
   }
 }
 
@@ -189,7 +257,7 @@ function evaluateExpression(
       }
 
       if (expression.callee) {
-        const args = []
+        const args: Expression[] = []
         for (const argument of expression.arguments) {
           let evaluated = evaluateExpression(argument, env, lastEvaluated)
 
@@ -197,17 +265,15 @@ function evaluateExpression(
             evaluated = {
               value: evaluated,
               type: NUMBER,
+              key: expression.operator,
               line: expression.position.line,
             }
           }
 
           args.push(evaluated)
         }
-        return {
-          type: PROGRESS,
-          value: args,
-          line: expression.position.line,
-        }
+
+        return evaluateCalleePrint(expression.callee, args, env)
       }
 
       return {
