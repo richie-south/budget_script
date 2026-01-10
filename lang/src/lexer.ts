@@ -4,6 +4,8 @@ export const lex_BINARY_OPERATOR = 'BinaryOperator'
 export const lex_EQUALS = 'Equals'
 export const lex_IDENTIFIER = 'Identifier'
 export const lex_NUMBER = 'Number'
+export const lex_UNIT_VALUE = 'UnitValue'
+export const lex_SPAN = 'Span'
 export const lex_HASH = 'Hash'
 export const lex_EOF = 'EOF'
 
@@ -16,6 +18,54 @@ type Type =
   | typeof lex_NUMBER
   | typeof lex_HASH
   | typeof lex_EOF
+  | typeof lex_UNIT_VALUE
+  | typeof lex_SPAN
+
+type BaseToken = {
+  position: Position
+  value: string
+}
+
+type OPEN_PARENTHESIS_TOKEN = {
+  type: typeof lex_OPEN_PARENTHESIS
+} & BaseToken
+
+type CLOSE_PARENTHESIS_TOKEN = {
+  type: typeof lex_CLOSE_PARENTHESIS
+} & BaseToken
+
+type BINARY_OPERATOR_TOKEN = {
+  type: typeof lex_BINARY_OPERATOR
+} & BaseToken
+
+type EQUALS_TOKEN = {
+  type: typeof lex_EQUALS
+} & BaseToken
+
+type IDENTIFIER_TOKEN = {
+  type: typeof lex_IDENTIFIER
+} & BaseToken
+
+type NUMBER_TOKEN = {
+  type: typeof lex_NUMBER
+} & BaseToken
+
+type HASH_TOKEN = {
+  type: typeof lex_HASH
+} & BaseToken
+
+type EOF_TOKEN = {
+  type: typeof lex_EOF
+} & BaseToken
+
+type UNIT_VALUE_TOKEN = {
+  type: typeof lex_UNIT_VALUE
+  unit: string
+} & BaseToken
+
+type SPAN_TOKEN = {
+  type: typeof lex_SPAN
+} & BaseToken
 
 type Position = {
   line: number
@@ -23,10 +73,24 @@ type Position = {
   end: number
 }
 
-export type Token = {
-  position: Position
-  value: string
-  type: Type
+export type Token =
+  | OPEN_PARENTHESIS_TOKEN
+  | CLOSE_PARENTHESIS_TOKEN
+  | BINARY_OPERATOR_TOKEN
+  | EQUALS_TOKEN
+  | IDENTIFIER_TOKEN
+  | NUMBER_TOKEN
+  | HASH_TOKEN
+  | EOF_TOKEN
+  | UNIT_VALUE_TOKEN
+  | SPAN_TOKEN
+
+function getPosition(position: Position): Position {
+  return {
+    line: position.line,
+    start: position.start,
+    end: position.end,
+  }
 }
 
 function token(type: Type, value: string, position: Position): Token {
@@ -38,7 +102,7 @@ function token(type: Type, value: string, position: Position): Token {
       start: position.start,
       end: position.end,
     },
-  }
+  } as Token
 }
 
 function isWhitespace(str: string): boolean {
@@ -63,6 +127,19 @@ function getNumber(chars: string[]): string {
   return num
 }
 
+function getUnit(chars: string[]): string {
+  if (isWhitespace(chars[0])) {
+    return
+  }
+
+  let unit = ''
+  while (chars.length > 0 && isAlpha(chars[0]) && !isWhitespace(chars[0])) {
+    unit += chars.shift()
+  }
+
+  return unit
+}
+
 function isNumber(str: string): boolean {
   const c = str.charCodeAt(0)
   const bounds = ['0'.charCodeAt(0), '9'.charCodeAt(0)]
@@ -75,6 +152,34 @@ function isBinaryOperator(char: string) {
 
 function isEqual(char: string) {
   return char === '='
+}
+
+function isDivide(char: string) {
+  return char === '/'
+}
+
+function getSpan(chars: string[]) {
+  if (isWhitespace(chars[1])) {
+    return
+  }
+
+  const copy = [...chars]
+  let span = ''
+  copy.shift()
+  while (copy.length > 0 && isAlpha(copy[0]) && !isWhitespace(copy[0])) {
+    span += copy.shift()
+  }
+
+  switch (span) {
+    case 'year':
+    case 'month':
+    case 'day':
+    case 'hour':
+    case 'minute':
+    case 'second':
+      chars.splice(0, span.length + 1)
+      return span
+  }
 }
 
 export function tokenize(sourceCode: string): Token[] {
@@ -107,6 +212,26 @@ export function tokenize(sourceCode: string): Token[] {
       )
       position = endPos
     } else if (isBinaryOperator(char)) {
+      if (isDivide(char)) {
+        const span = getSpan(chars)
+
+        if (span) {
+          const endPos = position + char.length + span.length
+          tokens.push({
+            type: lex_SPAN,
+            value: span,
+            position: getPosition({
+              line,
+              start: position,
+              end: endPos,
+            }),
+          })
+
+          position = endPos
+
+          continue
+        }
+      }
       const endPos = position + char.length
       tokens.push(
         token(lex_BINARY_OPERATOR, chars.shift(), {
@@ -156,16 +281,32 @@ export function tokenize(sourceCode: string): Token[] {
       } else if (isNumber(char)) {
         const num = getNumber(chars)
 
-        const endPos = position + num.length
-        tokens.push(
-          token(lex_NUMBER, num, {
-            line,
-            start: position,
-            end: endPos,
-          }),
-        )
+        const unit = getUnit(chars)
+        if (unit) {
+          const endPos = position + num.length + unit.length
+          tokens.push({
+            type: lex_UNIT_VALUE,
+            value: num,
+            unit,
+            position: getPosition({
+              line,
+              start: position,
+              end: endPos,
+            }),
+          })
 
-        position = endPos
+          position = endPos
+        } else {
+          const endPos = position + num.length
+          tokens.push(
+            token(lex_NUMBER, num, {
+              line,
+              start: position,
+              end: endPos,
+            }),
+          )
+          position = endPos
+        }
       } else if (isWhitespace(char)) {
         position += 1
 
