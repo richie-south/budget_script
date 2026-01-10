@@ -10,6 +10,8 @@ import {
   lex_BINARY_OPERATOR,
   lex_EQUALS,
   lex_EOF,
+  lex_UNIT_VALUE,
+  lex_SPAN,
 } from './lexer'
 import {tokenFactory, TokenFactory} from './token_factory'
 
@@ -27,10 +29,25 @@ export type Identifier = {
   symbol: string
 } & Base
 
+export const SPAN_EXPRESSION = 'SpanExpression'
+type SpanExpression = {
+  type: typeof SPAN_EXPRESSION
+  value: string
+} & Base
+
 export const NUMERIC_LITERAL = 'NumericLiteral'
 type NumericLiteral = {
   type: typeof NUMERIC_LITERAL
   value: number
+  span: SpanExpression
+} & Base
+
+export const UNIT_EXPRESSION = 'UnitExpression'
+type UnitExpression = {
+  type: typeof UNIT_EXPRESSION
+  value: number
+  unit: string
+  span: SpanExpression
 } & Base
 
 export const BINARY_EXPRESSION = 'BinaryExpression'
@@ -72,6 +89,8 @@ export type Expression =
   | AssignmentExpression
   | OutputExpression
   | UnaryExpression
+  | UnitExpression
+  | SpanExpression
 
 export type AST = {type: 'Program'; body: Expression[]}
 
@@ -106,6 +125,16 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
         type: NUMERIC_LITERAL,
         value: parseFloat(token.value),
         position: token.position,
+        span: parseSpanExpresion(tokens),
+      }
+    case lex_UNIT_VALUE:
+      tokens.next()
+      return {
+        type: UNIT_EXPRESSION,
+        unit: token.unit,
+        value: parseFloat(token.value),
+        position: token.position,
+        span: parseSpanExpresion(tokens),
       }
     case lex_OPEN_PARENTHESIS:
       tokens.next()
@@ -130,6 +159,22 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
   }
 }
 
+function parseSpanExpresion(tokens: TokenFactory): SpanExpression {
+  if (tokens.at().type === lex_SPAN) {
+    const position = tokens.at().position
+    const value = tokens.at().value
+    tokens.next()
+
+    return {
+      type: SPAN_EXPRESSION,
+      value,
+      position,
+    }
+  }
+
+  return
+}
+
 function parseUnaryExpression(tokens: TokenFactory): Expression {
   if (tokens.at().type === lex_BINARY_OPERATOR && tokens.at().value === '-') {
     const token = tokens.next()
@@ -149,7 +194,7 @@ function parseUnaryExpression(tokens: TokenFactory): Expression {
 function parseArguments(tokens: TokenFactory, line: number): Expression[] {
   const args: Expression[] = []
   while (tokens.at().type !== lex_EOF && tokens.at().position.line === line) {
-    const callee = parsePrimaryExpression(tokens)
+    const callee = parseExpresion(tokens)
     args.push(callee)
   }
 
@@ -213,8 +258,8 @@ function parseAssignmentExpresion(tokens: TokenFactory) {
       const value = parseExpresion(tokens)
 
       return {
-        value,
         type: ASSIGNMENT_EXPRESSION,
+        value,
         assignee: left,
         operator,
         position,
