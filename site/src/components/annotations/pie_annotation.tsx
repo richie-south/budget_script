@@ -1,0 +1,88 @@
+import { WidgetType } from "@codemirror/view"
+import { ResponsivePie } from "@nivo/pie"
+import { createRoot } from "react-dom/client"
+
+export interface PieChartDataItem {
+  label: string
+  value: number
+}
+const pieChartColors = [
+  "#6ee7b7", // accent
+  "#34d399", // accent-dim
+  "#3b82f6", // blue
+  "#8b5cf6", // purple
+  "#f59e0b", // amber
+  "#ec4899", // pink
+  "#06b6d4", // cyan
+  "#84cc16", // lime
+]
+
+export class PieChartAnnotationWidget extends WidgetType {
+  constructor(readonly data: PieChartDataItem[]) {
+    super()
+  }
+
+  toDOM() {
+    console.log("start")
+
+    const wrap = document.createElement("div")
+    wrap.setAttribute("aria-hidden", "true")
+    wrap.className = "cm-piechart-anno"
+
+    // Transform data for Nivo format
+    const chartData = this.data.map((item, index) => ({
+      id: item.label,
+      label: item.label ?? String(item.value),
+      value: item.value,
+      color: pieChartColors[index % pieChartColors.length],
+    }))
+
+    // Render React component into the DOM element
+    const root = createRoot(wrap)
+    root.render(
+      <div style={{ width: 480, height: 200 }}>
+        <ResponsivePie
+          data={chartData}
+          margin={{ top: 20, right: 80, bottom: 20, left: 80 }}
+          innerRadius={0.5}
+          padAngle={2}
+          cornerRadius={4}
+          activeOuterRadiusOffset={4}
+          colors={{ datum: "data.color" }}
+          borderWidth={1}
+          borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
+          enableArcLinkLabels={true}
+          arcLinkLabelsSkipAngle={10}
+          arcLinkLabelsTextColor="var(--text-secondary)"
+          arcLinkLabelsThickness={1}
+          arcLinkLabelsColor={{ from: "color" }}
+          arcLabelsSkipAngle={10}
+          arcLabelsTextColor={{ from: "color", modifiers: [["darker", 2.5]] }}
+          theme={{
+            text: {
+              fontSize: 11,
+              fontFamily: "'JetBrains Mono', monospace",
+            },
+            tooltip: {
+              container: {
+                background: "var(--bg-elevated)",
+                color: "var(--text-primary)",
+                fontSize: 12,
+                borderRadius: 6,
+                border: "1px solid var(--border)",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+              },
+            },
+          }}
+        />
+      </div>
+    )
+
+    return wrap
+  }
+
+  destroy(dom: HTMLElement) {
+    // Note: In a production app, you'd want to properly unmount the React root
+    // For simplicity, we're letting React handle cleanup
+  }
+}
