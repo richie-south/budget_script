@@ -487,4 +487,227 @@ describe('tokenize', () => {
       {value: 'EOF', type: 'EOF'},
     ])
   })
+
+  it('spread operator', () => {
+    const src = `#pie ...income`
+
+    expect(tokenize(src)).toEqual([
+      {value: '#', type: 'Hash', position: {line: 0, start: 0, end: 1}},
+      {
+        value: 'pie',
+        type: 'Identifier',
+        position: {line: 0, start: 1, end: 4},
+      },
+      {
+        value: '...',
+        type: 'Spread',
+        position: {line: 0, start: 5, end: 8},
+      },
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 0, start: 5, end: 11},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('spread operator', () => {
+    const src = `#pie ...income`
+
+    expect(tokenize(src)).toEqual([
+      {value: '#', type: 'Hash', position: {line: 0, start: 0, end: 1}},
+      {
+        value: 'pie',
+        type: 'Identifier',
+        position: {line: 0, start: 1, end: 4},
+      },
+      {
+        value: '...',
+        type: 'Spread',
+        position: {line: 0, start: 5, end: 8},
+      },
+      {
+        value: 'income',
+        type: 'Identifier',
+        position: {line: 0, start: 5, end: 11},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('in and month keywords', () => {
+    const src = `saving = 300 in oct`
+
+    const d = `
+    single line:
+
+    saving = 300 /month 400 in oct 200 from 23 sep 2027
+
+
+    multi line:
+    saving = 300 /month
+
+    saving = 400 in oct
+    saving = 200 from sep
+    `
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'saving',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        value: '300',
+        type: 'Number',
+        position: {line: 0, start: 9, end: 12},
+      },
+      {
+        value: 'in',
+        type: 'In',
+        position: {line: 0, start: 13, end: 15},
+      },
+      {
+        value: 'oct',
+        type: 'Month',
+        position: {line: 0, start: 16, end: 19},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('from and month keywords', () => {
+    const src = `saving = 300 from oct`
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'saving',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        value: '300',
+        type: 'Number',
+        position: {line: 0, start: 9, end: 12},
+      },
+      {
+        value: 'from',
+        type: 'From',
+        position: {line: 0, start: 13, end: 17},
+      },
+      {
+        value: 'oct',
+        type: 'Month',
+        position: {line: 0, start: 18, end: 21},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('from and month keywords with exakt date', () => {
+    const src = `saving = 300 from 23 oct 2027`
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'saving',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        value: '300',
+        type: 'Number',
+        position: {line: 0, start: 9, end: 12},
+      },
+      {
+        value: 'from',
+        type: 'From',
+        position: {line: 0, start: 13, end: 17},
+      },
+      {
+        value: '23',
+        type: 'Number',
+        position: {line: 0, start: 18, end: 20},
+      },
+      {
+        value: 'oct',
+        type: 'Month',
+        position: {line: 0, start: 21, end: 24},
+      },
+      {
+        value: '2027',
+        type: 'Number',
+        position: {line: 0, start: 25, end: 29},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('from and month keywords with exakt date', () => {
+    const src = `saving = 300 /month 200 from 23 oct 2027`
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'saving',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 6},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 7, end: 8},
+      },
+      {
+        value: '300',
+        type: 'Number',
+        position: {line: 0, start: 9, end: 12},
+      },
+      {
+        type: 'Span',
+        value: 'month',
+        position: {line: 0, start: 13, end: 19},
+      },
+      {
+        value: '200',
+        type: 'Number',
+        position: {line: 0, start: 20, end: 23},
+      },
+      {
+        value: 'from',
+        type: 'From',
+        position: {line: 0, start: 24, end: 28},
+      },
+      {
+        value: '23',
+        type: 'Number',
+        position: {line: 0, start: 29, end: 31},
+      },
+      {
+        value: 'oct',
+        type: 'Month',
+        position: {line: 0, start: 32, end: 35},
+      },
+      {
+        value: '2027',
+        type: 'Number',
+        position: {line: 0, start: 36, end: 40},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
 })

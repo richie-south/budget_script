@@ -8,6 +8,27 @@ export const lex_UNIT_VALUE = 'UnitValue'
 export const lex_SPAN = 'Span'
 export const lex_HASH = 'Hash'
 export const lex_EOF = 'EOF'
+export const lex_SPREAD = 'Spread'
+export const lex_IN = 'In'
+export const lex_FROM = 'From'
+export const LEX_MONTH = 'Month'
+
+const KEYWORDS = {
+  in: lex_IN,
+  from: lex_FROM,
+  jan: LEX_MONTH,
+  feb: LEX_MONTH,
+  mar: LEX_MONTH,
+  apr: LEX_MONTH,
+  may: LEX_MONTH,
+  jun: LEX_MONTH,
+  jul: LEX_MONTH,
+  aug: LEX_MONTH,
+  sep: LEX_MONTH,
+  oct: LEX_MONTH,
+  nov: LEX_MONTH,
+  dec: LEX_MONTH,
+}
 
 type Type =
   | typeof lex_OPEN_PARENTHESIS
@@ -20,6 +41,10 @@ type Type =
   | typeof lex_EOF
   | typeof lex_UNIT_VALUE
   | typeof lex_SPAN
+  | typeof lex_SPREAD
+  | typeof lex_IN
+  | typeof lex_FROM
+  | typeof LEX_MONTH
 
 type BaseToken = {
   position: Position
@@ -67,6 +92,22 @@ type SPAN_TOKEN = {
   type: typeof lex_SPAN
 } & BaseToken
 
+type SPREAD_TOKEN = {
+  type: typeof lex_SPREAD
+} & BaseToken
+
+type IM_TOKEN = {
+  type: typeof lex_IN
+} & BaseToken
+
+type FROM_TOKEN = {
+  type: typeof lex_FROM
+} & BaseToken
+
+type MONTH_TOKEN = {
+  type: typeof LEX_MONTH
+} & BaseToken
+
 type Position = {
   line: number
   start: number
@@ -84,6 +125,10 @@ export type Token =
   | EOF_TOKEN
   | UNIT_VALUE_TOKEN
   | SPAN_TOKEN
+  | SPREAD_TOKEN
+  | IM_TOKEN
+  | FROM_TOKEN
+  | MONTH_TOKEN
 
 function getPosition(position: Position): Position {
   return {
@@ -182,6 +227,39 @@ function getSpan(chars: string[]) {
   }
 }
 
+function isSpread(chars: string[]): boolean {
+  if (chars[0] === '.' && chars[1] === '.' && chars[2] === '.') {
+    chars.shift()
+    chars.shift()
+    chars.shift()
+    return true
+  }
+
+  return false
+}
+
+function getKeyword(str: string) {
+  switch (str) {
+    case 'in':
+      return lex_IN
+    case 'from':
+      return lex_FROM
+    case 'jan':
+    case 'feb':
+    case 'mar':
+    case 'apr':
+    case 'may':
+    case 'jun':
+    case 'jul':
+    case 'aug':
+    case 'sep':
+    case 'oct':
+    case 'nov':
+    case 'dec':
+      return LEX_MONTH
+  }
+}
+
 export function tokenize(sourceCode: string): Token[] {
   const chars = sourceCode.split('')
   const tokens = []
@@ -261,21 +339,41 @@ export function tokenize(sourceCode: string): Token[] {
         }),
       )
       position = endPos
+    } else if (char === '.') {
+      if (isSpread(chars)) {
+        tokens.push(
+          token(lex_SPREAD, '...', {
+            line,
+            start: position,
+            end: position + 3,
+          }),
+        )
+      }
     } else {
       if (isAlpha(char)) {
         let str = ''
         while (chars.length > 0 && isAlpha(chars[0])) {
           str += chars.shift()
         }
-
         const endPos = position + str.length
-        tokens.push(
-          token(lex_IDENTIFIER, str, {
-            line,
-            start: position,
-            end: endPos,
-          }),
-        )
+
+        if (KEYWORDS[str]) {
+          tokens.push(
+            token(KEYWORDS[str], str, {
+              line,
+              start: position,
+              end: endPos,
+            }),
+          )
+        } else {
+          tokens.push(
+            token(lex_IDENTIFIER, str, {
+              line,
+              start: position,
+              end: endPos,
+            }),
+          )
+        }
 
         position = endPos
       } else if (isNumber(char)) {
