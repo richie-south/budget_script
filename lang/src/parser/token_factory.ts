@@ -1,4 +1,4 @@
-import {Token} from './lexer'
+import {Token} from '../lexer/lexer'
 
 export type TokenFactory = ReturnType<typeof tokenFactory>
 export function tokenFactory(to: Token[]) {
