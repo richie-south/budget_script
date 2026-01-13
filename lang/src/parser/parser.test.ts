@@ -846,54 +846,6 @@ describe('parser', () => {
     })
   })
 
-  it.skip('print progress from previous', () => {
-    const src = `asd kingen #progress`
-
-    /* console.log('parser(src)', JSON.stringify(parser(src), null, 2)) */
-    expect(parser(src)).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'Identifier',
-          symbol: 'asd',
-          position: {
-            line: 0,
-            start: 0,
-            end: 3,
-          },
-        },
-        {
-          type: 'OutputExpression',
-          operator: '#',
-          callee: {
-            type: 'Identifier',
-            symbol: 'progress',
-            position: {
-              line: 0,
-              start: 12,
-              end: 20,
-            },
-          },
-          arguments: [],
-          position: {
-            line: 0,
-            start: 11,
-            end: 12,
-          },
-          expression: {
-            type: 'Identifier',
-            symbol: 'kingen',
-            position: {
-              line: 0,
-              start: 4,
-              end: 10,
-            },
-          },
-        },
-      ],
-    })
-  })
-
   it('print progress', () => {
     const src = `asd = 100 #
     kingen = 200`
@@ -1166,8 +1118,11 @@ describe('parser', () => {
     })
   })
 
-  it('progress span args', () => {
-    const src = `#predict income 3/year`
+  it('dev', () => {
+    const src = `netflix = 100
+hundmat = 300
+spotify = 100
+monthly = netflix + hundmat + spotify`
 
     /* console.log(JSON.stringify(parser(src), null, 2)) */
 
@@ -1175,43 +1130,189 @@ describe('parser', () => {
       type: 'Program',
       body: [
         {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 100,
+            position: {
+              line: 0,
+              start: 10,
+              end: 13,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'netflix',
+            position: {
+              line: 0,
+              start: 0,
+              end: 7,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 8,
+            end: 9,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 300,
+            position: {
+              line: 1,
+              start: 10,
+              end: 13,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'hundmat',
+            position: {
+              line: 1,
+              start: 0,
+              end: 7,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 8,
+            end: 9,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 100,
+            position: {
+              line: 2,
+              start: 10,
+              end: 13,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'spotify',
+            position: {
+              line: 2,
+              start: 0,
+              end: 7,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 2,
+            start: 8,
+            end: 9,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'Identifier',
+              symbol: 'netflix',
+              position: {
+                line: 3,
+                start: 10,
+                end: 17,
+              },
+            },
+            right: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'Identifier',
+                symbol: 'hundmat',
+                position: {
+                  line: 3,
+                  start: 20,
+                  end: 27,
+                },
+              },
+              right: {
+                type: 'Identifier',
+                symbol: 'spotify',
+                position: {
+                  line: 3,
+                  start: 30,
+                  end: 37,
+                },
+              },
+              operator: '+',
+              position: {
+                line: 3,
+                start: 28,
+                end: 29,
+              },
+            },
+            operator: '+',
+            position: {
+              line: 3,
+              start: 18,
+              end: 19,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'monthly',
+            position: {
+              line: 3,
+              start: 0,
+              end: 7,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 3,
+            start: 8,
+            end: 9,
+          },
+        },
+      ],
+    })
+  })
+
+  it('spread operator', () => {
+    const src = `#pie ...income`
+
+    const result = parser(src)
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
           type: 'OutputExpression',
           operator: '#',
           callee: {
             type: 'Identifier',
-            symbol: 'predict',
+            symbol: 'pie',
             position: {
               line: 0,
               start: 1,
-              end: 8,
+              end: 4,
             },
           },
           arguments: [
             {
-              type: 'Identifier',
-              symbol: 'income',
-              position: {
-                line: 0,
-                start: 9,
-                end: 15,
-              },
-            },
-            {
-              type: 'NumericLiteral',
-              value: 3,
-              position: {
-                line: 0,
-                start: 16,
-                end: 17,
-              },
-              span: {
-                type: 'SpanExpression',
-                value: 'year',
+              type: 'SpreadExpression',
+              argument: {
+                type: 'Identifier',
+                symbol: 'income',
                 position: {
                   line: 0,
-                  start: 17,
-                  end: 22,
+                  start: 5,
+                  end: 11,
                 },
+              },
+              operator: '...',
+              position: {
+                line: 0,
+                start: 5,
+                end: 8,
               },
             },
           ],
@@ -1219,6 +1320,434 @@ describe('parser', () => {
             line: 0,
             start: 0,
             end: 1,
+          },
+        },
+      ],
+    })
+  })
+
+  it('spread operator 2', () => {
+    const src = `
+    netflix = 109
+    spotify = 99
+    expenses = netflix + spotify
+    #pie ...expenses`
+
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 109,
+            position: {
+              line: 1,
+              start: 14,
+              end: 17,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'netflix',
+            position: {
+              line: 1,
+              start: 4,
+              end: 11,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 12,
+            end: 13,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 99,
+            position: {
+              line: 2,
+              start: 14,
+              end: 16,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'spotify',
+            position: {
+              line: 2,
+              start: 4,
+              end: 11,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 2,
+            start: 12,
+            end: 13,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'Identifier',
+              symbol: 'netflix',
+              position: {
+                line: 3,
+                start: 15,
+                end: 22,
+              },
+            },
+            right: {
+              type: 'Identifier',
+              symbol: 'spotify',
+              position: {
+                line: 3,
+                start: 25,
+                end: 32,
+              },
+            },
+            operator: '+',
+            position: {
+              line: 3,
+              start: 23,
+              end: 24,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'expenses',
+            position: {
+              line: 3,
+              start: 4,
+              end: 12,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 3,
+            start: 13,
+            end: 14,
+          },
+        },
+        {
+          type: 'OutputExpression',
+          operator: '#',
+          callee: {
+            type: 'Identifier',
+            symbol: 'pie',
+            position: {
+              line: 4,
+              start: 5,
+              end: 8,
+            },
+          },
+          arguments: [
+            {
+              type: 'SpreadExpression',
+              argument: {
+                type: 'Identifier',
+                symbol: 'expenses',
+                position: {
+                  line: 4,
+                  start: 9,
+                  end: 17,
+                },
+              },
+              operator: '...',
+              position: {
+                line: 4,
+                start: 9,
+                end: 12,
+              },
+            },
+          ],
+          position: {
+            line: 4,
+            start: 4,
+            end: 5,
+          },
+        },
+      ],
+    })
+  })
+
+  it('add', () => {
+    const src = `
+    avanza = 300
+    fond = 100
+    savings = avanza + fond
+    netflix = 109
+    spotify = 99
+    total = netflix + spotify + savings`
+
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 300,
+            position: {
+              line: 1,
+              start: 13,
+              end: 16,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'avanza',
+            position: {
+              line: 1,
+              start: 4,
+              end: 10,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 1,
+            start: 11,
+            end: 12,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 100,
+            position: {
+              line: 2,
+              start: 11,
+              end: 14,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'fond',
+            position: {
+              line: 2,
+              start: 4,
+              end: 8,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 2,
+            start: 9,
+            end: 10,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'Identifier',
+              symbol: 'avanza',
+              position: {
+                line: 3,
+                start: 14,
+                end: 20,
+              },
+            },
+            right: {
+              type: 'Identifier',
+              symbol: 'fond',
+              position: {
+                line: 3,
+                start: 23,
+                end: 27,
+              },
+            },
+            operator: '+',
+            position: {
+              line: 3,
+              start: 21,
+              end: 22,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'savings',
+            position: {
+              line: 3,
+              start: 4,
+              end: 11,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 3,
+            start: 12,
+            end: 13,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 109,
+            position: {
+              line: 4,
+              start: 14,
+              end: 17,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'netflix',
+            position: {
+              line: 4,
+              start: 4,
+              end: 11,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 4,
+            start: 12,
+            end: 13,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 99,
+            position: {
+              line: 5,
+              start: 14,
+              end: 16,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'spotify',
+            position: {
+              line: 5,
+              start: 4,
+              end: 11,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 5,
+            start: 12,
+            end: 13,
+          },
+        },
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'BinaryExpression',
+            left: {
+              type: 'Identifier',
+              symbol: 'netflix',
+              position: {
+                line: 6,
+                start: 12,
+                end: 19,
+              },
+            },
+            right: {
+              type: 'BinaryExpression',
+              left: {
+                type: 'Identifier',
+                symbol: 'spotify',
+                position: {
+                  line: 6,
+                  start: 22,
+                  end: 29,
+                },
+              },
+              right: {
+                type: 'Identifier',
+                symbol: 'savings',
+                position: {
+                  line: 6,
+                  start: 32,
+                  end: 39,
+                },
+              },
+              operator: '+',
+              position: {
+                line: 6,
+                start: 30,
+                end: 31,
+              },
+            },
+            operator: '+',
+            position: {
+              line: 6,
+              start: 20,
+              end: 21,
+            },
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'total',
+            position: {
+              line: 6,
+              start: 4,
+              end: 9,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 6,
+            start: 10,
+            end: 11,
+          },
+        },
+      ],
+    })
+  })
+
+  it('in and month keywords', () => {
+    const src = `saving = 300 in oct 400`
+
+    const result = parser(src)
+    console.log(JSON.stringify(result, null, 2))
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          value: {
+            type: 'NumericLiteral',
+            value: 300,
+            position: {
+              line: 0,
+              start: 9,
+              end: 12,
+            },
+            modifiers: [],
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'saving',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
           },
         },
       ],

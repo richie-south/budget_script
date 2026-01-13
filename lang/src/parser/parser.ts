@@ -1,4 +1,4 @@
-import {ParseError} from './errors'
+import {ParseError} from '../errors'
 import {
   tokenize,
   Token,
@@ -12,15 +12,21 @@ import {
   lex_EOF,
   lex_UNIT_VALUE,
   lex_SPAN,
-} from './lexer'
+  lex_SPREAD,
+  lex_IN,
+  lex_FROM,
+  LEX_MONTH,
+} from '../lexer/lexer'
 import {tokenFactory, TokenFactory} from './token_factory'
 
+export type Position = {
+  line: number
+  start: number
+  end: number
+}
+
 type Base = {
-  position: {
-    line: number
-    start: number
-    end: number
-  }
+  position: Position
 }
 
 export const IDENTIFIER = 'Identifier'
@@ -35,15 +41,37 @@ type SpanExpression = {
   value: string
 } & Base
 
+export const MODIFY_EXPRESSION = 'ModifyExpression'
+type ModifyExpression = {
+  type: typeof MODIFY_EXPRESSION
+  value: number
+  day?: number
+  month?:
+    | 'jan'
+    | 'feb'
+    | 'mar'
+    | 'apr'
+    | 'may'
+    | 'jun'
+    | 'jul'
+    | 'aug'
+    | 'sep'
+    | 'oct'
+    | 'nov'
+    | 'dec'
+  year?: number
+} & Base
+
 export const NUMERIC_LITERAL = 'NumericLiteral'
-type NumericLiteral = {
+export type NumericLiteral = {
   type: typeof NUMERIC_LITERAL
   value: number
-  span: SpanExpression
+  span?: SpanExpression
+  modifiers?: ModifyExpression[]
 } & Base
 
 export const UNIT_EXPRESSION = 'UnitExpression'
-type UnitExpression = {
+export type UnitExpression = {
   type: typeof UNIT_EXPRESSION
   value: number
   unit: string
@@ -82,6 +110,13 @@ export type UnaryExpression = {
   operator: string
 } & Base
 
+export const SPREAD_EXPRESSION = 'SpreadExpression'
+export type SpreadExpression = {
+  type: typeof SPREAD_EXPRESSION
+  argument: Expression
+  operator: string
+} & Base
+
 export type Expression =
   | Identifier
   | NumericLiteral
@@ -91,6 +126,7 @@ export type Expression =
   | UnaryExpression
   | UnitExpression
   | SpanExpression
+  | SpreadExpression
 
 export type AST = {type: 'Program'; body: Expression[]}
 
@@ -153,6 +189,24 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
     case lex_CLOSE_PARENTHESIS:
       throw new ParseError(
         `Missing open parenthesis`,
+        tokens.at().position.line,
+        tokens.at().position.start,
+      )
+    case lex_IN:
+      throw new ParseError(
+        `In is unsuported`,
+        tokens.at().position.line,
+        tokens.at().position.start,
+      )
+    case lex_FROM:
+      throw new ParseError(
+        `from is unsuported`,
+        tokens.at().position.line,
+        tokens.at().position.start,
+      )
+    case LEX_MONTH:
+      throw new ParseError(
+        `month is unsuported`,
         tokens.at().position.line,
         tokens.at().position.start,
       )
@@ -226,7 +280,7 @@ function parseMultiplicativeExpresion(tokens: TokenFactory) {
 }
 
 function parseAdditiveExpresion(tokens: TokenFactory) {
-  return (left?: Expression): Expression => {
+  return (prevoius?: Expression): Expression => {
     if (
       tokens.at().type === lex_BINARY_OPERATOR &&
       (tokens.at().value === '+' || tokens.at().value === '-')
@@ -237,19 +291,19 @@ function parseAdditiveExpresion(tokens: TokenFactory) {
       const right = parseExpresion(tokens)
       return {
         type: BINARY_EXPRESSION,
-        left,
+        left: prevoius,
         right,
         operator,
         position,
       }
     }
 
-    return left
+    return prevoius
   }
 }
 
 function parseAssignmentExpresion(tokens: TokenFactory) {
-  return (left?: Expression): Expression => {
+  return (prevoius?: Expression): Expression => {
     if (tokens.at().type === lex_EQUALS) {
       const position = tokens.at().position
       const operator = tokens.at().value
@@ -260,13 +314,13 @@ function parseAssignmentExpresion(tokens: TokenFactory) {
       return {
         type: ASSIGNMENT_EXPRESSION,
         value,
-        assignee: left,
+        assignee: prevoius,
         operator,
         position,
       }
     }
 
-    return left
+    return prevoius
   }
 }
 
@@ -306,6 +360,25 @@ function parseOutputExpression(
   }
 }
 
+function parseSpredExpresion(tokens: TokenFactory) {
+  return (prevoius?: Expression): Expression => {
+    if (tokens.at().type === lex_SPREAD) {
+      const position = tokens.at().position
+      const operator = tokens.next().value
+
+      const argument = parseExpresion(tokens)
+      return {
+        type: SPREAD_EXPRESSION,
+        argument,
+        operator,
+        position,
+      }
+    }
+
+    return prevoius
+  }
+}
+
 function isSameLine(expression: Expression, nextToken: Token) {
   if (!expression || !nextToken || nextToken.type === lex_EOF) {
     return false
@@ -316,6 +389,7 @@ function isSameLine(expression: Expression, nextToken: Token) {
 function parseExpresion(tokens: TokenFactory): Expression {
   return pipe(
     parseUnaryExpression(tokens),
+    parseSpredExpresion(tokens),
     parseMultiplicativeExpresion(tokens),
     parseAdditiveExpresion(tokens),
     parseAssignmentExpresion(tokens),
