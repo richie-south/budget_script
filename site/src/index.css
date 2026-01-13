@@ -20,27 +20,28 @@
 }
 
 progress {
-  appearance: none; /* Hides default styling */
+  appearance: none;
+  /* Hides default styling */
   -webkit-appearance: none;
   width: 100%;
   height: 10px;
-  border: none; /* Removes default border */
+  border: none;
+  /* Removes default border */
   border-radius: 999px;
-  background-color: var(--bg-light); /* The track */
+  background-color: var(--bg-light);
+  /* The track */
   overflow: hidden;
 }
 
 progress::-webkit-progress-value {
-  background: linear-gradient(
-    45deg,
-    var(--accent) 25%,
-    var(--accent-dim) 25%,
-    var(--accent-dim) 50%,
-    var(--accent) 50%,
-    var(--accent) 75%,
-    var(--accent-dim) 75%,
-    var(--accent-dim)
-  );
+  background: linear-gradient(45deg,
+      var(--accent) 25%,
+      var(--accent-dim) 25%,
+      var(--accent-dim) 50%,
+      var(--accent) 50%,
+      var(--accent) 75%,
+      var(--accent-dim) 75%,
+      var(--accent-dim));
   background-size: 20px 20px;
   border-radius: 999px;
   box-shadow: 0 0 15px var(--accent-bg);
@@ -60,6 +61,7 @@ progress::-moz-progress-bar {
   from {
     background-position: 0 0;
   }
+
   to {
     background-position: 20px 0;
   }
@@ -282,10 +284,12 @@ html {
 }
 
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
@@ -344,6 +348,7 @@ html {
   flex: 1;
   background: var(--bg-deep);
   position: relative;
+  overflow-y: auto;
 }
 
 /* CodeMirror Overrides */
@@ -434,6 +439,18 @@ html {
   justify-content: center;
   align-content: center;
   margin-top: 4px;
+}
+
+.cm-piechart-anno {
+  background: var(--bg-elevated);
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  margin-top: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* Empty state */

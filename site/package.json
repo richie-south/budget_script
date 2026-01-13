@@ -23,6 +23,9 @@
   "dependencies": {
     "@codemirror/state": "^6.5.3",
     "@codemirror/view": "^6.39.9",
+    "@nivo/bar": "^0.99.0",
+    "@nivo/line": "^0.99.0",
+    "@nivo/pie": "^0.99.0",
     "clsx": "^2.1.1",
     "codemirror": "^6.0.2",
     "react": "^19.2.3",
