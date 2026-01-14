@@ -41,24 +41,28 @@ type SpanExpression = {
   value: string
 } & Base
 
+const monthShortToIndex = {
+  jan: 1,
+  feb: 2,
+  mar: 3,
+  apr: 4,
+  may: 5,
+  jun: 6,
+  jul: 7,
+  aug: 8,
+  sep: 9,
+  oct: 10,
+  nov: 11,
+  dec: 12,
+}
+
 export const MODIFY_EXPRESSION = 'ModifyExpression'
-type ModifyExpression = {
+export type ModifyExpression = {
   type: typeof MODIFY_EXPRESSION
-  value: number
+  permanent: boolean
+  value: Expression
   day?: number
-  month?:
-    | 'jan'
-    | 'feb'
-    | 'mar'
-    | 'apr'
-    | 'may'
-    | 'jun'
-    | 'jul'
-    | 'aug'
-    | 'sep'
-    | 'oct'
-    | 'nov'
-    | 'dec'
+  month?: number
   year?: number
 } & Base
 
@@ -90,7 +94,8 @@ export const ASSIGNMENT_EXPRESSION = 'AssignmentExpression'
 export type AssignmentExpression = {
   type: typeof ASSIGNMENT_EXPRESSION
   assignee: Expression
-  value: Expression
+  value?: Expression
+  modifyer?: ModifyExpression
   operator: string
 } & Base
 
@@ -302,6 +307,114 @@ function parseAdditiveExpresion(tokens: TokenFactory) {
   }
 }
 
+function parseMonthExpresion(tokens: TokenFactory): ModifyExpression['month'] {
+  if (tokens.at().type === LEX_MONTH) {
+    const token = tokens.at()
+    tokens.next()
+
+    return monthShortToIndex[token.value]
+  }
+}
+
+function parseModifierDateExpresion(
+  prevToken: Token,
+  tokens: TokenFactory,
+): any {
+  if (prevToken.position.line !== tokens.at().position.line) {
+    throw new ParseError(
+      'Date is required after modifier',
+      tokens.at().position.line,
+      tokens.at().position.start,
+    )
+  }
+
+  let month: ModifyExpression['month']
+  let year: number
+  let day: number
+
+  switch (tokens.at().type) {
+    case LEX_MONTH: {
+      const token = tokens.at()
+      month = parseMonthExpresion(tokens)
+
+      if (
+        tokens.at().type !== lex_EOF &&
+        tokens.at().position.line === token.position.line &&
+        tokens.at().type === lex_NUMBER
+      ) {
+        const number = parsePrimaryExpression(tokens) as NumericLiteral
+        year = number.value
+      }
+      break
+    }
+
+    case lex_NUMBER: {
+      const token = tokens.at()
+      const number = parsePrimaryExpression(tokens) as NumericLiteral
+      day = number.value
+      if (
+        tokens.at().type !== lex_EOF &&
+        tokens.at().position.line === token.position.line &&
+        tokens.at().type === LEX_MONTH
+      ) {
+        const token2 = tokens.at()
+        month = parseMonthExpresion(tokens)
+
+        if (
+          tokens.at().type !== lex_EOF &&
+          tokens.at().position.line === token2.position.line &&
+          tokens.at().type === lex_NUMBER
+        ) {
+          const number = parsePrimaryExpression(tokens) as NumericLiteral
+          year = number.value
+        }
+        break
+      }
+    }
+  }
+
+  return {
+    month,
+    day,
+    year,
+  }
+}
+
+function parseFromInExpresion(
+  tokens: TokenFactory,
+  value: Expression,
+): ModifyExpression {
+  if (tokens.at().type === lex_FROM) {
+    const token = tokens.at()
+    tokens.next()
+    const {day, month, year} = parseModifierDateExpresion(token, tokens)
+    return {
+      type: MODIFY_EXPRESSION,
+      permanent: true,
+      value: value,
+      position: token.position,
+      day,
+      month,
+      year,
+    }
+  } else if (tokens.at().type === lex_IN) {
+    const token = tokens.at()
+    tokens.next()
+    const {day, month, year} = parseModifierDateExpresion(token, tokens)
+    return {
+      type: MODIFY_EXPRESSION,
+      permanent: false,
+      value: value,
+      position: token.position,
+      day,
+      month,
+      year,
+    }
+  }
+
+  return
+}
+
 function parseAssignmentExpresion(tokens: TokenFactory) {
   return (prevoius?: Expression): Expression => {
     if (tokens.at().type === lex_EQUALS) {
@@ -310,6 +423,17 @@ function parseAssignmentExpresion(tokens: TokenFactory) {
       tokens.next()
 
       const value = parseExpresion(tokens)
+      const modifyer = parseFromInExpresion(tokens, value)
+
+      if (modifyer) {
+        return {
+          type: ASSIGNMENT_EXPRESSION,
+          modifyer: modifyer,
+          assignee: prevoius,
+          operator,
+          position,
+        }
+      }
 
       return {
         type: ASSIGNMENT_EXPRESSION,
