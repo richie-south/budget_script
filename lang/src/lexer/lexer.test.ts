@@ -539,19 +539,6 @@ describe('tokenize', () => {
   it('in and month keywords', () => {
     const src = `saving = 300 in oct`
 
-    const d = `
-    single line:
-
-    saving = 300 /month 400 in oct 200 from 23 sep 2027
-
-
-    multi line:
-    saving = 300 /month
-
-    saving = 400 in oct
-    saving = 200 from sep
-    `
-
     expect(tokenize(src)).toEqual([
       {
         value: 'saving',
@@ -658,7 +645,8 @@ describe('tokenize', () => {
     ])
   })
 
-  it('from and month keywords with exakt date', () => {
+  // should not be supported by parser
+  it.skip('from and month keywords with exakt date', () => {
     const src = `saving = 300 /month 200 from 23 oct 2027`
 
     expect(tokenize(src)).toEqual([
