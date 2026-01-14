@@ -1,7 +1,6 @@
 import {NumberVariable, Variable} from './enviroment/variable_factory'
 import {Env} from './enviroment/environment'
 import {EvaluatorError} from '../errors'
-import {getSteps} from './steps'
 import {
   AssignmentExpression,
   BinaryExpression,
@@ -21,6 +20,7 @@ import {
   NumericLiteral,
   UNIT_EXPRESSION,
   UnitExpression,
+  ModifyExpression,
 } from '../parser/parser'
 import {dateFactory} from './enviroment/date_factory'
 
@@ -117,6 +117,43 @@ function evaluateIdentifier(identifier: Identifier, env: Env): Variable {
   return undef
 }
 
+function evaluateModifier(
+  modifier: ModifyExpression,
+  symbol: string,
+  env: Env,
+) {
+  const variable = env.variables.get(symbol)
+  if (!variable) {
+    return
+  }
+
+  const clone = {...variable}
+  if (Array.isArray(clone.modifiers)) {
+    clone.modifiers.push({
+      type: 'date',
+      day: modifier.day,
+      month: modifier.month,
+      year: modifier.year,
+      permanent: modifier.permanent,
+      value: evaluateNumeric(modifier.value as NumericLiteral).value,
+    })
+  } else {
+    clone.modifiers = [
+      {
+        type: 'date',
+        day: modifier.day,
+        month: modifier.month,
+        year: modifier.year,
+        permanent: modifier.permanent,
+        value: evaluateNumeric(modifier.value as NumericLiteral).value,
+      },
+    ]
+  }
+
+  env.variables.set(symbol, clone)
+  return clone
+}
+
 function evaluateAssignment(variable: AssignmentExpression, env: Env) {
   if (!variable.assignee || variable.assignee.type !== IDENTIFIER) {
     throw new EvaluatorError(
@@ -159,6 +196,8 @@ function evaluateAssignment(variable: AssignmentExpression, env: Env) {
       env.variables.set(variable.assignee.symbol, undef)
       return undef
     }
+  } else if (variable.modifyer) {
+    return evaluateModifier(variable.modifyer, variable.assignee.symbol, env)
   }
 
   return evaluateNumeric({
@@ -166,6 +205,35 @@ function evaluateAssignment(variable: AssignmentExpression, env: Env) {
     value: 0,
     position: variable.position,
   })
+}
+
+function evaluateTimesBinary(
+  left: ParsedNumber | NumberVariable,
+  right: ParsedNumber | NumberVariable,
+) {
+  if (left.type === 'variable') {
+    switch (left.span) {
+      case 'day':
+      case 'month':
+      case 'year':
+    }
+
+    switch (left.unit) {
+      case 'year':
+    }
+  }
+
+  if (right.type === 'variable') {
+    switch (right.span) {
+      case 'day':
+      case 'month':
+      case 'year':
+    }
+
+    switch (right.unit) {
+      case 'year':
+    }
+  }
 }
 
 function evaluateNumericBinary(
@@ -318,6 +386,76 @@ function evaluateArguments(expressions: Expression[], env: Env): DataFlow[] {
   return args
 }
 
+function getSteps(
+  start: NumberVariable | ParsedNumber,
+  limit: NumberVariable | ParsedNumber,
+  env: Env,
+): number[] {
+  const results: number[] = []
+
+  const now = env.date.getToday()
+  const predictDate = dateFactory(now.date)
+  let currentTotal = start.value
+  let increasBy = start.value
+  const modifiers = start.type === 'variable' ? start.modifiers ?? [] : []
+
+  let index = 1
+  let day = predictDate.getToday()
+  results.push(currentTotal)
+
+  while (currentTotal <= limit.value) {
+    switch (start.span) {
+      case 'day': {
+        day = predictDate.addDays(index)
+        break
+      }
+      case 'month': {
+        day = predictDate.addMonths(index)
+        break
+      }
+      case 'year': {
+        day = predictDate.addYears(index)
+        break
+      }
+    }
+
+    const modifier = modifiers.find((modifier) => {
+      switch (start.span) {
+        case 'month': {
+          if (modifier.month && modifier.year) {
+            if (modifier.month === day.monthNr && modifier.year === day.year) {
+              return true
+            }
+          } else if (modifier.month) {
+            if (modifier.month === day.monthNr) {
+              return true
+            }
+          } else if (modifier.year) {
+            if (modifier.year === day.year) {
+              return true
+            }
+          }
+        }
+      }
+    })
+
+    if (modifier) {
+      if (modifier.permanent) {
+        increasBy = modifier.value
+      } else {
+        currentTotal += modifier.value
+      }
+    } else {
+      currentTotal += increasBy
+    }
+
+    results.push(currentTotal)
+    index += 1
+  }
+
+  return results
+}
+
 function getPredictions(data: DataFlow[], env: Env) {
   if (data.length !== 2) {
     return
@@ -329,7 +467,8 @@ function getPredictions(data: DataFlow[], env: Env) {
     return
   }
 
-  const steps = getSteps(curent.value, future.value)
+  const steps = getSteps(curent, future, env)
+
   const now = env.date.getToday()
   const predictDate = dateFactory(now.date)
 
