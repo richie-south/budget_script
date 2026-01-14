@@ -9,8 +9,9 @@ export type NumberVariable = {
   references?: string[]
   unit?: string
   span?: Span
-  pivots?: {
+  modifiers?: {
     type: 'date'
+    value: number
     day: number
     month: number
     year: number
