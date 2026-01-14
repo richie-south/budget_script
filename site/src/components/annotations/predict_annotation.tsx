@@ -23,11 +23,13 @@ export class LineChartAnnotationWidget extends WidgetType {
     let tickValues: any = undefined // Default: show all
 
     if (dataLength > 10) {
-      tickValues = [
-        firstSeries[0].x,
-        firstSeries[firstSeries.length / 2].x,
-        firstSeries[firstSeries.length - 1].x,
-      ]
+      try {
+        tickValues = [
+          firstSeries[0].x,
+          firstSeries[firstSeries.length / 2].x,
+          firstSeries[firstSeries.length - 1].x,
+        ]
+      } catch (error) {}
     }
 
     const chartTheme = {
