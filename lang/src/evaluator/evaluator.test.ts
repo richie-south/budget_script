@@ -692,7 +692,6 @@ describe('evaluator', () => {
     goal = 60
     #predict saving goal`
 
-    const date = new Date()
     const env = enviroment(new Date())
     const ast = parser(src)
     const result = evaluate(ast, env)
@@ -744,10 +743,293 @@ describe('evaluator', () => {
                 x: 'June 2026',
                 y: 60,
               },
+              {
+                x: 'July 2026',
+                y: 70,
+              },
             ],
           },
         ],
         line: 3,
+      },
+    ])
+  })
+
+  it('output callee predict with modifier', () => {
+    const src = `
+    saving = 10 /month
+    saving = 40 in feb
+    goal = 100
+    #predict saving goal`
+
+    const env = enviroment(new Date(2026, 0))
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 10,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 10,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+        modifiers: [
+          {
+            type: 'date',
+            month: 2,
+            permanent: false,
+            value: 40,
+          },
+        ],
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 100,
+        line: 3,
+        identifier: 'goal',
+      },
+      {
+        type: 'print',
+        dataType: 'predict',
+        value: [
+          {
+            id: 'saving',
+            data: [
+              {
+                x: 'January 2026',
+                y: 10,
+              },
+              {
+                x: 'February 2026',
+                y: 50,
+              },
+              {
+                x: 'March 2026',
+                y: 60,
+              },
+              {
+                x: 'April 2026',
+                y: 70,
+              },
+              {
+                x: 'May 2026',
+                y: 80,
+              },
+              {
+                x: 'June 2026',
+                y: 90,
+              },
+              {
+                x: 'July 2026',
+                y: 100,
+              },
+              {
+                x: 'August 2026',
+                y: 110,
+              },
+            ],
+          },
+        ],
+        line: 4,
+      },
+    ])
+  })
+
+  it('modifier in', () => {
+    const src = `
+    saving = 400 /month
+    saving = 300 in oct`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+        modifiers: [
+          {
+            type: 'date',
+            month: 10,
+            value: 300,
+            permanent: false,
+          },
+        ],
+      },
+    ])
+  })
+
+  it('modifier from', () => {
+    const src = `
+    saving = 400 /month
+    saving = 300 from oct`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+        modifiers: [
+          {
+            type: 'date',
+            month: 10,
+            value: 300,
+            permanent: true,
+          },
+        ],
+      },
+    ])
+  })
+
+  it('modifier in with day', () => {
+    const src = `
+    saving = 400 /month
+    saving = 300 from 23 oct`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+        modifiers: [
+          {
+            type: 'date',
+            day: 23,
+            month: 10,
+            value: 300,
+            permanent: true,
+          },
+        ],
+      },
+    ])
+  })
+
+  it('modifier in with year', () => {
+    const src = `
+    saving = 400 /month
+    saving = 300 from oct 2027`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+        modifiers: [
+          {
+            type: 'date',
+            month: 10,
+            year: 2027,
+            value: 300,
+            permanent: true,
+          },
+        ],
+      },
+    ])
+  })
+
+  it('modifier in with day month year', () => {
+    const src = `
+    saving = 400 /month
+    saving = 300 from 23 oct 2027`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 1,
+        identifier: 'saving',
+        span: 'month',
+        modifiers: [
+          {
+            type: 'date',
+            day: 23,
+            month: 10,
+            year: 2027,
+            value: 300,
+            permanent: true,
+          },
+        ],
       },
     ])
   })
