@@ -1713,26 +1713,234 @@ monthly = netflix + hundmat + spotify`
     })
   })
 
-  it('in and month keywords', () => {
-    const src = `saving = 300 in oct 400`
+  it('modifier in', () => {
+    const src = `saving = 300 in oct`
 
     const result = parser(src)
-    console.log(JSON.stringify(result, null, 2))
 
     expect(result).toEqual({
       type: 'Program',
       body: [
         {
           type: 'AssignmentExpression',
-          value: {
-            type: 'NumericLiteral',
-            value: 300,
+          modifyer: {
+            type: 'ModifyExpression',
+            permanent: false,
+            value: {
+              type: 'NumericLiteral',
+              value: 300,
+              position: {
+                line: 0,
+                start: 9,
+                end: 12,
+              },
+            },
             position: {
               line: 0,
-              start: 9,
-              end: 12,
+              start: 13,
+              end: 15,
             },
-            modifiers: [],
+            month: 10,
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'saving',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('modifier from', () => {
+    const src = `saving = 300 from oct`
+
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          modifyer: {
+            type: 'ModifyExpression',
+            permanent: true,
+            value: {
+              type: 'NumericLiteral',
+              value: 300,
+              position: {
+                line: 0,
+                start: 9,
+                end: 12,
+              },
+            },
+            position: {
+              line: 0,
+              start: 13,
+              end: 17,
+            },
+            month: 10,
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'saving',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('modifier in with day', () => {
+    const src = `saving = 300 from 23 oct`
+
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          modifyer: {
+            type: 'ModifyExpression',
+            permanent: true,
+            value: {
+              type: 'NumericLiteral',
+              value: 300,
+              position: {
+                line: 0,
+                start: 9,
+                end: 12,
+              },
+            },
+            position: {
+              line: 0,
+              start: 13,
+              end: 17,
+            },
+            day: 23,
+            month: 10,
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'saving',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('modifier in with year', () => {
+    const src = `saving = 300 from oct 2027`
+
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          modifyer: {
+            type: 'ModifyExpression',
+            permanent: true,
+            value: {
+              type: 'NumericLiteral',
+              value: 300,
+              position: {
+                line: 0,
+                start: 9,
+                end: 12,
+              },
+            },
+            position: {
+              line: 0,
+              start: 13,
+              end: 17,
+            },
+            month: 10,
+            year: 2027,
+          },
+          assignee: {
+            type: 'Identifier',
+            symbol: 'saving',
+            position: {
+              line: 0,
+              start: 0,
+              end: 6,
+            },
+          },
+          operator: '=',
+          position: {
+            line: 0,
+            start: 7,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('modifier in with day month year', () => {
+    const src = `saving = 300 from 23 oct 2027`
+
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'AssignmentExpression',
+          modifyer: {
+            type: 'ModifyExpression',
+            permanent: true,
+            value: {
+              type: 'NumericLiteral',
+              value: 300,
+              position: {
+                line: 0,
+                start: 9,
+                end: 12,
+              },
+            },
+            position: {
+              line: 0,
+              start: 13,
+              end: 17,
+            },
+            day: 23,
+            month: 10,
+            year: 2027,
           },
           assignee: {
             type: 'Identifier',
