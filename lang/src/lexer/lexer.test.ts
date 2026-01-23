@@ -24,6 +24,29 @@ describe('tokenize', () => {
     ])
   })
 
+  it('underscore identifier', () => {
+    const src = `income_person_a = 1000`
+
+    expect(tokenize(src)).toEqual([
+      {
+        value: 'income_person_a',
+        type: 'Identifier',
+        position: {line: 0, start: 0, end: 15},
+      },
+      {
+        value: '=',
+        type: 'Equals',
+        position: {line: 0, start: 16, end: 17},
+      },
+      {
+        value: '1000',
+        type: 'Number',
+        position: {line: 0, start: 18, end: 22},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
   it('Binary operators', () => {
     const src = `10 + 20 - 10 * 3 / 2`
 
