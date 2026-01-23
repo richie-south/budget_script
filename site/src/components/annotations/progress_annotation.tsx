@@ -1,19 +1,31 @@
 import { WidgetType } from "@codemirror/view"
+import { createRoot } from "react-dom/client"
+import { CollapsibleBox } from "./box"
 
 export class ProgressAnnotationWidget extends WidgetType {
-  constructor(readonly values: any[]) {
+  private id: string
+
+  constructor(readonly values: any[], readonly line: number) {
     super()
+    this.id = `progress-${line}`
   }
+
   toDOM() {
-    let wrap = document.createElement("div")
-
+    const wrap = document.createElement("div")
     wrap.setAttribute("aria-hidden", "true")
-    wrap.className = "cm-progress-anno"
+    wrap.className = "cm-annotation-wrapper"
 
-    let progress = document.createElement("progress")
-    progress.setAttribute("value", (this.values[0]?.value ?? 0).toString())
-    progress.setAttribute("max", (this.values[1]?.value ?? 100).toString())
-    wrap.appendChild(progress)
+    const value = this.values[0]?.value ?? 0
+    const max = this.values[1]?.value ?? 100
+
+    const root = createRoot(wrap)
+    root.render(
+      <CollapsibleBox id={this.id} title="Progress">
+        <div className="cm-progress-anno">
+          <progress value={value} max={max} />
+        </div>
+      </CollapsibleBox>
+    )
 
     return wrap
   }

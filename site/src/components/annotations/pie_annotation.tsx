@@ -1,6 +1,7 @@
 import { WidgetType } from "@codemirror/view"
 import { ResponsivePie } from "@nivo/pie"
 import { createRoot } from "react-dom/client"
+import { CollapsibleBox } from "./box"
 
 export interface PieChartDataItem {
   label: string
@@ -18,16 +19,22 @@ const pieChartColors = [
 ]
 
 export class PieChartAnnotationWidget extends WidgetType {
-  constructor(readonly data: PieChartDataItem[]) {
+  private id: string
+
+  constructor(readonly data: PieChartDataItem[], readonly line: number) {
     super()
+    // Create a stable ID based on line and data hash
+    this.id = `pie-${line}-${this.hashData()}`
+  }
+
+  private hashData(): string {
+    return this.data.map((d) => `${d.label}:${d.value}`).join(",")
   }
 
   toDOM() {
-    console.log("start")
-
     const wrap = document.createElement("div")
     wrap.setAttribute("aria-hidden", "true")
-    wrap.className = "cm-piechart-anno"
+    wrap.className = "cm-annotation-wrapper"
 
     // Transform data for Nivo format
     const chartData = this.data.map((item, index) => ({
@@ -40,42 +47,11 @@ export class PieChartAnnotationWidget extends WidgetType {
     // Render React component into the DOM element
     const root = createRoot(wrap)
     root.render(
-      <div style={{ width: 480, height: 200 }}>
-        <ResponsivePie
-          data={chartData}
-          margin={{ top: 20, right: 80, bottom: 20, left: 80 }}
-          innerRadius={0.5}
-          padAngle={2}
-          cornerRadius={4}
-          activeOuterRadiusOffset={4}
-          colors={{ datum: "data.color" }}
-          borderWidth={1}
-          borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
-          enableArcLinkLabels={true}
-          arcLinkLabelsSkipAngle={10}
-          arcLinkLabelsTextColor="var(--text-secondary)"
-          arcLinkLabelsThickness={1}
-          arcLinkLabelsColor={{ from: "color" }}
-          arcLabelsSkipAngle={10}
-          arcLabelsTextColor={{ from: "color", modifiers: [["darker", 2.5]] }}
-          theme={{
-            text: {
-              fontSize: 11,
-              fontFamily: "'JetBrains Mono', monospace",
-            },
-            tooltip: {
-              container: {
-                background: "var(--bg-elevated)",
-                color: "var(--text-primary)",
-                fontSize: 12,
-                borderRadius: 6,
-                border: "1px solid var(--border)",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              },
-            },
-          }}
-        />
-      </div>
+      <CollapsibleBox id={this.id} title="Pie Chart">
+        <div className="cm-piechart-anno">
+          <Pie chartData={chartData} />
+        </div>
+      </CollapsibleBox>
     )
 
     return wrap
@@ -85,4 +61,54 @@ export class PieChartAnnotationWidget extends WidgetType {
     // Note: In a production app, you'd want to properly unmount the React root
     // For simplicity, we're letting React handle cleanup
   }
+}
+
+function Pie({
+  chartData,
+}: {
+  chartData: {
+    id: string
+    label: string
+    value: number
+    color: string
+  }[]
+}) {
+  return (
+    <div style={{ width: 480, height: 200 }}>
+      <ResponsivePie
+        data={chartData}
+        margin={{ top: 20, right: 80, bottom: 20, left: 80 }}
+        innerRadius={0.5}
+        padAngle={2}
+        cornerRadius={4}
+        activeOuterRadiusOffset={4}
+        colors={{ datum: "data.color" }}
+        borderWidth={1}
+        borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
+        enableArcLinkLabels={true}
+        arcLinkLabelsSkipAngle={10}
+        arcLinkLabelsTextColor="var(--text-secondary)"
+        arcLinkLabelsThickness={1}
+        arcLinkLabelsColor={{ from: "color" }}
+        arcLabelsSkipAngle={10}
+        arcLabelsTextColor={{ from: "color", modifiers: [["darker", 2.5]] }}
+        theme={{
+          text: {
+            fontSize: 11,
+            fontFamily: "'JetBrains Mono', monospace",
+          },
+          tooltip: {
+            container: {
+              background: "var(--bg-elevated)",
+              color: "var(--text-primary)",
+              fontSize: 12,
+              borderRadius: 6,
+              border: "1px solid var(--border)",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
+            },
+          },
+        }}
+      />
+    </div>
+  )
 }

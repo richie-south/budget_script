@@ -48,7 +48,7 @@ function getDecorations(state: EditorState): DecorationSet {
         const line = state.doc.line(result.line + 1)
         widgets.push(
           Decoration.widget({
-            widget: new ProgressAnnotationWidget(result.value as any),
+            widget: new ProgressAnnotationWidget(result.value as any, result.line),
             side: 1,
           }).range(line.to)
         )
@@ -69,7 +69,7 @@ function getDecorations(state: EditorState): DecorationSet {
 
           widgets.push(
             Decoration.widget({
-              widget: new PieChartAnnotationWidget(pieData),
+              widget: new PieChartAnnotationWidget(pieData, result.line),
               side: 1,
               block: true,
             }).range(line.to)
@@ -87,7 +87,7 @@ function getDecorations(state: EditorState): DecorationSet {
         if (Array.isArray(result.value)) {
           widgets.push(
             Decoration.widget({
-              widget: new LineChartAnnotationWidget(result.value),
+              widget: new LineChartAnnotationWidget(result.value, result.line),
               side: 1,
               block: true,
             }).range(line.to)
