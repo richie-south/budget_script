@@ -1,5 +1,6 @@
 import React from "react"
 import { Note } from "../hooks/useNotes"
+import imgUrl from "/icons/logo.png"
 
 interface SidebarProps {
   notes: Note[]
@@ -47,7 +48,7 @@ export function Sidebar({
       <aside className={`sidebar ${isOpen ? "open" : ""}`} id="sidebar">
         <div className="sidebar-header">
           <div className="logo">
-            <div className="logo-icon">B$</div>
+            <img src={imgUrl} width={36} height={36} alt="Budget Script" style={{ borderRadius: '8px' }} />
             <span className="logo-text">Budget Script</span>
           </div>
           <button
