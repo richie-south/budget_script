@@ -23,8 +23,9 @@ import {
   ModifyExpression,
 } from '../parser/parser'
 import {dateFactory} from './enviroment/date_factory'
+import {evaluateTimesBinary} from './binary_calculations'
 
-type ParsedNumber = {
+export type ParsedNumber = {
   type: 'number'
   dataType: 'number'
   value: number
@@ -71,7 +72,7 @@ export type Print = {
 
 type DataFlow = ParsedNumber | NumberVariable | Print
 
-function evaluateNumeric(
+export function evaluateNumeric(
   expression: NumericLiteral | UnitExpression,
 ): ParsedNumber {
   const span = expression.span
@@ -207,33 +208,41 @@ function evaluateAssignment(variable: AssignmentExpression, env: Env) {
   })
 }
 
-function evaluateTimesBinary(
+function addReferencesFromBinary(
   left: ParsedNumber | NumberVariable,
   right: ParsedNumber | NumberVariable,
-) {
+  parsedNumber: ParsedNumber,
+): ParsedNumber {
+  if (
+    left.type === 'variable' ||
+    right.type === 'variable' ||
+    right.references ||
+    left.references
+  ) {
+    parsedNumber.references = []
+  }
+
   if (left.type === 'variable') {
-    switch (left.span) {
-      case 'day':
-      case 'month':
-      case 'year':
-    }
-
-    switch (left.unit) {
-      case 'year':
-    }
+    // TODO: might add left and right references here to digg deeper
+    parsedNumber.references.push(left.identifier)
   }
-
   if (right.type === 'variable') {
-    switch (right.span) {
-      case 'day':
-      case 'month':
-      case 'year':
-    }
+    parsedNumber.references.push(right.identifier)
+  }
 
-    switch (right.unit) {
-      case 'year':
+  if (right.type === 'number') {
+    if (right.references) {
+      parsedNumber.references.push(...right.references)
     }
   }
+
+  if (left.type === 'number') {
+    if (left.references) {
+      parsedNumber.references.push(...left.references)
+    }
+  }
+
+  return parsedNumber
 }
 
 function evaluateNumericBinary(
@@ -249,7 +258,8 @@ function evaluateNumericBinary(
   } else if (operator === '-') {
     res = left.value - right.value
   } else if (operator === '*') {
-    res = left.value * right.value
+    const numeric = evaluateTimesBinary(left, right, binary)
+    return addReferencesFromBinary(left, right, numeric)
   } else if (operator === '/') {
     if (right.value === 0) {
       throw new EvaluatorError(
@@ -276,36 +286,7 @@ function evaluateNumericBinary(
     position: binary.position,
   })
 
-  if (
-    left.type === 'variable' ||
-    right.type === 'variable' ||
-    right.references ||
-    left.references
-  ) {
-    numeric.references = []
-  }
-
-  if (left.type === 'variable') {
-    // TODO: might add left and right references here to digg deeper
-    numeric.references.push(left.identifier)
-  }
-  if (right.type === 'variable') {
-    numeric.references.push(right.identifier)
-  }
-
-  if (right.type === 'number') {
-    if (right.references) {
-      numeric.references.push(...right.references)
-    }
-  }
-
-  if (left.type === 'number') {
-    if (left.references) {
-      numeric.references.push(...left.references)
-    }
-  }
-
-  return numeric
+  return addReferencesFromBinary(left, right, numeric)
 }
 
 function evaluateBinary(
