@@ -158,6 +158,14 @@ function isNewLine(str: string): boolean {
   return str == '\n'
 }
 
+function isAllowedName(str: string): boolean {
+  if (str === '_') {
+    return true
+  }
+
+  return isAlpha(str)
+}
+
 function isAlpha(str: string): boolean {
   return str.toUpperCase() != str.toLowerCase()
 }
@@ -178,7 +186,11 @@ function getUnit(chars: string[]): string {
   }
 
   let unit = ''
-  while (chars.length > 0 && isAlpha(chars[0]) && !isWhitespace(chars[0])) {
+  while (
+    chars.length > 0 &&
+    isAllowedName(chars[0]) &&
+    !isWhitespace(chars[0])
+  ) {
     unit += chars.shift()
   }
 
@@ -211,7 +223,7 @@ function getSpan(chars: string[]) {
   const copy = [...chars]
   let span = ''
   copy.shift()
-  while (copy.length > 0 && isAlpha(copy[0]) && !isWhitespace(copy[0])) {
+  while (copy.length > 0 && isAllowedName(copy[0]) && !isWhitespace(copy[0])) {
     span += copy.shift()
   }
 
@@ -236,28 +248,6 @@ function isSpread(chars: string[]): boolean {
   }
 
   return false
-}
-
-function getKeyword(str: string) {
-  switch (str) {
-    case 'in':
-      return lex_IN
-    case 'from':
-      return lex_FROM
-    case 'jan':
-    case 'feb':
-    case 'mar':
-    case 'apr':
-    case 'may':
-    case 'jun':
-    case 'jul':
-    case 'aug':
-    case 'sep':
-    case 'oct':
-    case 'nov':
-    case 'dec':
-      return LEX_MONTH
-  }
 }
 
 export function tokenize(sourceCode: string): Token[] {
@@ -350,9 +340,9 @@ export function tokenize(sourceCode: string): Token[] {
         )
       }
     } else {
-      if (isAlpha(char)) {
+      if (isAllowedName(char)) {
         let str = ''
-        while (chars.length > 0 && isAlpha(chars[0])) {
+        while (chars.length > 0 && isAllowedName(chars[0])) {
           str += chars.shift()
         }
         const endPos = position + str.length
