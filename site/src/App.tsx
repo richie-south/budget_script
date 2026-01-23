@@ -10,7 +10,7 @@ function App() {
   const [saveStatus, setSaveStatus] = useState<"saved" | "saving">("saved")
   const [metrics, setMetrics] = useState({ charCount: 0, lineCount: 0 })
 
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const saveTimeoutRef = useRef<number | undefined>(undefined)
 
   // Initialize with first note if available, or create one
   useEffect(() => {
@@ -55,26 +55,29 @@ function App() {
         // Let's rely on finding the next best note.
         // Since we are using state setter for delete, we can't easily predict next state here without logic.
         // But we have `notes` in scope.
-        const remaining = notes.filter(n => n.id !== id)
+        const remaining = notes.filter((n) => n.id !== id)
         if (remaining.length > 0) {
-           setActiveNoteId(remaining[0].id)
+          setActiveNoteId(remaining[0].id)
         }
       }
     }
   }
 
-  const handleNoteUpdate = useCallback((id: string, updates: { title?: string; content?: string }) => {
-    setSaveStatus("saving")
+  const handleNoteUpdate = useCallback(
+    (id: string, updates: { title?: string; content?: string }) => {
+      setSaveStatus("saving")
 
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
 
-    saveTimeoutRef.current = setTimeout(() => {
-      updateNote(id, updates)
-      setSaveStatus("saved")
-    }, 500)
-  }, [updateNote])
+      saveTimeoutRef.current = setTimeout(() => {
+        updateNote(id, updates)
+        setSaveStatus("saved")
+      }, 500)
+    },
+    [updateNote],
+  )
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -101,25 +104,31 @@ function App() {
     }
   }
 
-  const handleContentChange = useCallback((content: string) => {
-    if (activeNoteId) {
-      handleNoteUpdate(activeNoteId, { content })
-    }
-  }, [activeNoteId, handleNoteUpdate])
+  const handleContentChange = useCallback(
+    (content: string) => {
+      if (activeNoteId) {
+        handleNoteUpdate(activeNoteId, { content })
+      }
+    },
+    [activeNoteId, handleNoteUpdate],
+  )
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
 
-  const handleMetricsChange = useCallback((charCount: number, lineCount: number) => {
-    setMetrics({ charCount, lineCount })
-  }, [])
+  const handleMetricsChange = useCallback(
+    (charCount: number, lineCount: number) => {
+      setMetrics({ charCount, lineCount })
+    },
+    [],
+  )
 
   // Update metrics when active note changes
   useEffect(() => {
     if (activeNote) {
-       setMetrics({
-         charCount: activeNote.content.length,
-         lineCount: activeNote.content.split('\n').length
-       })
+      setMetrics({
+        charCount: activeNote.content.length,
+        lineCount: activeNote.content.split("\n").length,
+      })
     }
   }, [activeNoteId]) // Only reset when ID changes, actual updates come from Editor callback
 
@@ -187,9 +196,11 @@ function App() {
           />
         ) : (
           <div className="empty-state">
-             <div className="empty-state-icon">📝</div>
-             <div className="empty-state-title">No Note Selected</div>
-             <div className="empty-state-text">Select a note from the sidebar or create a new one.</div>
+            <div className="empty-state-icon">📝</div>
+            <div className="empty-state-title">No Note Selected</div>
+            <div className="empty-state-text">
+              Select a note from the sidebar or create a new one.
+            </div>
           </div>
         )}
       </main>
