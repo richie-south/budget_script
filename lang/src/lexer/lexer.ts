@@ -329,16 +329,14 @@ export function tokenize(sourceCode: string): Token[] {
         }),
       )
       position = endPos
-    } else if (char === '.') {
-      if (isSpread(chars)) {
-        tokens.push(
-          token(lex_SPREAD, '...', {
-            line,
-            start: position,
-            end: position + 3,
-          }),
-        )
-      }
+    } else if (char === '.' && isSpread(chars)) {
+      tokens.push(
+        token(lex_SPREAD, '...', {
+          line,
+          start: position,
+          end: position + 3,
+        }),
+      )
     } else {
       if (isAllowedName(char)) {
         let str = ''
