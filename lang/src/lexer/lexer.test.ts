@@ -1,6 +1,6 @@
 import {tokenize} from './lexer'
 
-describe('tokenize', () => {
+describe('lexer', () => {
   it('One Identifier', () => {
     const src = `income = 1000`
 
@@ -663,6 +663,25 @@ describe('tokenize', () => {
         value: '2027',
         type: 'Number',
         position: {line: 0, start: 25, end: 29},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('should not get stuck on unfinished spread', () => {
+    const src = `#pie ..expenses`
+
+    expect(tokenize(src)).toEqual([
+      {value: '#', type: 'Hash', position: {line: 0, start: 0, end: 1}},
+      {
+        value: 'pie',
+        type: 'Identifier',
+        position: {line: 0, start: 1, end: 4},
+      },
+      {
+        value: 'expenses',
+        type: 'Identifier',
+        position: {line: 0, start: 7, end: 15},
       },
       {value: 'EOF', type: 'EOF'},
     ])
