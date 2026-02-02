@@ -53,6 +53,12 @@ type PrintPie = {
   value: DataFlow[]
 }
 
+const BAR = 'bar'
+type PrintBar = {
+  dataType: typeof BAR
+  value: DataFlow[]
+}
+
 const PREDICT = 'predict'
 type PrintPredict = {
   dataType: typeof PREDICT
@@ -68,7 +74,7 @@ type PrintPredict = {
 export type Print = {
   type: 'print'
   line: number
-} & (PrintPrint | PrintProgress | PrintPie | PrintPredict)
+} & (PrintPrint | PrintProgress | PrintPie | PrintPredict | PrintBar)
 
 type DataFlow = ParsedNumber | NumberVariable | Print
 
@@ -378,7 +384,7 @@ function getSteps(
   const predictDate = dateFactory(now.date)
   let currentTotal = start.value
   let increasBy = start.value
-  const modifiers = start.type === 'variable' ? start.modifiers ?? [] : []
+  const modifiers = start.type === 'variable' ? (start.modifiers ?? []) : []
 
   let index = 1
   let day = predictDate.getToday()
@@ -512,6 +518,14 @@ function evaluateCalleePrint(
         type: 'print',
         dataType: PREDICT,
         value: getPredictions(args, env),
+        line: expression.position.line,
+      }
+
+    case BAR:
+      return {
+        type: 'print',
+        dataType: BAR,
+        value: args,
         line: expression.position.line,
       }
   }
