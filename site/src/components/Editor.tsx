@@ -15,6 +15,10 @@ import {
   PieChartDataItem,
 } from "./annotations/pie_annotation"
 import { LineChartAnnotationWidget } from "./annotations/predict_annotation"
+import {
+  BarChartAnnotationWidget,
+  BarChartDataItem,
+} from "./annotations/bar_annotation"
 
 function getDecorations(state: EditorState): DecorationSet {
   const widgets: any[] = []
@@ -27,6 +31,7 @@ function getDecorations(state: EditorState): DecorationSet {
     const progress = evaluated.filter((a) => a.dataType === "progress")
     const pieCharts = evaluated.filter((a) => a.dataType === "pie")
     const predictCharts = evaluated.filter((a) => a.dataType === "predict")
+    const barCharts = evaluated.filter((a) => a.dataType === "bar")
 
     for (const result of prints) {
       try {
@@ -36,7 +41,7 @@ function getDecorations(state: EditorState): DecorationSet {
           Decoration.widget({
             widget: new PrintAnnotationWidget((result.value as any).value),
             side: 1,
-          }).range(line.to)
+          }).range(line.to),
         )
       } catch (e) {
         console.log("e", e)
@@ -48,9 +53,12 @@ function getDecorations(state: EditorState): DecorationSet {
         const line = state.doc.line(result.line + 1)
         widgets.push(
           Decoration.widget({
-            widget: new ProgressAnnotationWidget(result.value as any, result.line),
+            widget: new ProgressAnnotationWidget(
+              result.value as any,
+              result.line,
+            ),
             side: 1,
-          }).range(line.to)
+          }).range(line.to),
         )
       } catch (e) {
         console.log("e", e)
@@ -72,7 +80,7 @@ function getDecorations(state: EditorState): DecorationSet {
               widget: new PieChartAnnotationWidget(pieData, result.line),
               side: 1,
               block: true,
-            }).range(line.to)
+            }).range(line.to),
           )
         }
       } catch (e) {
@@ -90,11 +98,34 @@ function getDecorations(state: EditorState): DecorationSet {
               widget: new LineChartAnnotationWidget(result.value, result.line),
               side: 1,
               block: true,
-            }).range(line.to)
+            }).range(line.to),
           )
         }
       } catch (e) {
         console.log("pie chart error", e)
+      }
+    }
+
+    for (const result of barCharts) {
+      try {
+        const line = state.doc.line(result.line + 1)
+
+        if (Array.isArray(result.value)) {
+          const pieData: BarChartDataItem[] = result.value.map((item: any) => ({
+            label: String(item.identifier ?? item.value),
+            value: Number(item.value),
+          }))
+
+          widgets.push(
+            Decoration.widget({
+              widget: new BarChartAnnotationWidget(pieData, result.line),
+              side: 1,
+              block: true,
+            }).range(line.to),
+          )
+        }
+      } catch (e) {
+        console.log("bar chart error", e)
       }
     }
 
@@ -107,7 +138,7 @@ function getDecorations(state: EditorState): DecorationSet {
           Decoration.widget({
             widget: new ErrorAnnotationWidget(error.message),
             side: 1,
-          }).range(line.to)
+          }).range(line.to),
         )
       } catch (e) {
         // If error line is out of bounds (e.g. while typing)
@@ -219,5 +250,5 @@ export const Editor = memo(
 
     return <div className="editor-container" ref={editorContainer} />
   },
-  () => true
+  () => true,
 ) // Never re-render - props are only used on mount, key change handles note switching
