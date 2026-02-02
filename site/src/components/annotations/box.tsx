@@ -56,13 +56,7 @@ export function CollapsibleBox({
           />
         </svg>
       </button>
-      {isOpen ? (
-        <div className="collapsible-content">{children}</div>
-      ) : (
-        <div className="collapsible-folded">
-          <div className="folded-line" />
-        </div>
-      )}
+      {isOpen && <div className="collapsible-content">{children}</div>}
     </div>
   )
 }

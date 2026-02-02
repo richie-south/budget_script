@@ -509,15 +509,6 @@ html {
   padding: 8px 12px;
 }
 
-.folded-line {
-  height: 2px;
-  background: linear-gradient(90deg,
-      var(--border) 0%,
-      var(--accent-secondary) 50%,
-      var(--border) 100%);
-  border-radius: 1px;
-  opacity: 0.4;
-}
 
 /* Empty state */
 .empty-state {
