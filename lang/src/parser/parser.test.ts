@@ -1961,4 +1961,73 @@ monthly = netflix + hundmat + spotify`
       ],
     })
   })
+
+  it('should find multible spreads after another', () => {
+    const src = `#pie ...groceries ...premurations`
+
+    const result = parser(src)
+    console.log(JSON.stringify(result, null, 2))
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'OutputExpression',
+          operator: '#',
+          callee: {
+            type: 'Identifier',
+            symbol: 'pie',
+            position: {
+              line: 0,
+              start: 1,
+              end: 4,
+            },
+          },
+          arguments: [
+            {
+              type: 'SpreadExpression',
+              argument: {
+                type: 'Identifier',
+                symbol: 'groceries',
+                position: {
+                  line: 0,
+                  start: 5,
+                  end: 14,
+                },
+              },
+              operator: '...',
+              position: {
+                line: 0,
+                start: 5,
+                end: 8,
+              },
+            },
+            {
+              type: 'SpreadExpression',
+              argument: {
+                type: 'Identifier',
+                symbol: 'premurations',
+                position: {
+                  line: 0,
+                  start: 15,
+                  end: 27,
+                },
+              },
+              operator: '...',
+              position: {
+                line: 0,
+                start: 15,
+                end: 18,
+              },
+            },
+          ],
+          position: {
+            line: 0,
+            start: 0,
+            end: 1,
+          },
+        },
+      ],
+    })
+  })
 })

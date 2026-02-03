@@ -720,31 +720,31 @@ describe('evaluator', () => {
             id: 'saving',
             data: [
               {
-                x: 'January 2026',
+                x: 'February 2026',
                 y: 10,
               },
               {
-                x: 'February 2026',
+                x: 'March 2026',
                 y: 20,
               },
               {
-                x: 'March 2026',
+                x: 'April 2026',
                 y: 30,
               },
               {
-                x: 'April 2026',
+                x: 'May 2026',
                 y: 40,
               },
               {
-                x: 'May 2026',
+                x: 'June 2026',
                 y: 50,
               },
               {
-                x: 'June 2026',
+                x: 'July 2026',
                 y: 60,
               },
               {
-                x: 'July 2026',
+                x: 'August 2026',
                 y: 70,
               },
             ],
@@ -841,6 +841,105 @@ describe('evaluator', () => {
           },
         ],
         line: 4,
+      },
+    ])
+  })
+
+  it('output calle bar with mulible spread', () => {
+    const src = `
+frukt = 100
+kott = 100
+jani = frukt + kott
+
+ett = 200
+två = 200
+data = ett + två
+
+#bar ...jani ...data`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 100,
+        line: 1,
+        identifier: 'frukt',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 100,
+        line: 2,
+        identifier: 'kott',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 200,
+        line: 3,
+        identifier: 'jani',
+        references: ['frukt', 'kott'],
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 200,
+        line: 5,
+        identifier: 'ett',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 200,
+        line: 6,
+        identifier: 'två',
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 400,
+        line: 7,
+        identifier: 'data',
+        references: ['ett', 'två'],
+      },
+      {
+        type: 'print',
+        dataType: 'bar',
+        value: [
+          {
+            type: 'variable',
+            dataType: 'number',
+            value: 100,
+            line: 1,
+            identifier: 'frukt',
+          },
+          {
+            type: 'variable',
+            dataType: 'number',
+            value: 100,
+            line: 2,
+            identifier: 'kott',
+          },
+          {
+            type: 'variable',
+            dataType: 'number',
+            value: 200,
+            line: 5,
+            identifier: 'ett',
+          },
+          {
+            type: 'variable',
+            dataType: 'number',
+            value: 200,
+            line: 6,
+            identifier: 'två',
+          },
+        ],
+        line: 9,
       },
     ])
   })

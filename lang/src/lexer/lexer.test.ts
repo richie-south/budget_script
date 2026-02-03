@@ -687,6 +687,40 @@ describe('lexer', () => {
     ])
   })
 
+  it('should find multible spreads after another', () => {
+    const src = `#pie ...groceries ...premurations`
+
+    expect(tokenize(src)).toEqual([
+      {value: '#', type: 'Hash', position: {line: 0, start: 0, end: 1}},
+      {
+        value: 'pie',
+        type: 'Identifier',
+        position: {line: 0, start: 1, end: 4},
+      },
+      {
+        value: '...',
+        type: 'Spread',
+        position: {line: 0, start: 5, end: 8},
+      },
+      {
+        value: 'groceries',
+        type: 'Identifier',
+        position: {line: 0, start: 5, end: 14},
+      },
+      {
+        value: '...',
+        type: 'Spread',
+        position: {line: 0, start: 15, end: 18},
+      },
+      {
+        value: 'premurations',
+        type: 'Identifier',
+        position: {line: 0, start: 15, end: 27},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
   // should not be supported by parser
   it.skip('from and month keywords with exakt date', () => {
     const src = `saving = 300 /month 200 from 23 oct 2027`
