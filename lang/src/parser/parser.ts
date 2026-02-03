@@ -490,7 +490,7 @@ function parseSpredExpresion(tokens: TokenFactory) {
       const position = tokens.at().position
       const operator = tokens.next().value
 
-      const argument = parseExpresion(tokens)
+      const argument = parseUnaryExpression(tokens)
       return {
         type: SPREAD_EXPRESSION,
         argument,
