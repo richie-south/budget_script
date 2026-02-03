@@ -443,7 +443,8 @@ html {
   align-content: center;
 }
 
-.cm-piechart-anno {
+.cm-piechart-anno,
+.cm-barchart-anno {
   background: var(--bg-elevated);
   padding: 16px;
   border-radius: 10px;
