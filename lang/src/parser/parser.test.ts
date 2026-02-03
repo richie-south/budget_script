@@ -1966,7 +1966,6 @@ monthly = netflix + hundmat + spotify`
     const src = `#pie ...groceries ...premurations`
 
     const result = parser(src)
-    console.log(JSON.stringify(result, null, 2))
 
     expect(result).toEqual({
       type: 'Program',
