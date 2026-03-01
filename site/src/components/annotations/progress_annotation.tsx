@@ -1,6 +1,7 @@
 import { WidgetType } from "@codemirror/view"
 import { createRoot } from "react-dom/client"
 import { CollapsibleBox } from "./box"
+import { ErrorBoundary } from "../error"
 
 export class ProgressAnnotationWidget extends WidgetType {
   private id: string
@@ -20,11 +21,13 @@ export class ProgressAnnotationWidget extends WidgetType {
 
     const root = createRoot(wrap)
     root.render(
-      <CollapsibleBox id={this.id} title="Progress">
-        <div className="cm-progress-anno">
-          <progress value={value} max={max} />
-        </div>
-      </CollapsibleBox>
+      <ErrorBoundary fallback={<div className="error-ui">Failed to render progress.</div>}>
+        <CollapsibleBox id={this.id} title="Progress">
+          <div className="cm-progress-anno">
+            <progress value={value} max={max} />
+          </div>
+        </CollapsibleBox>
+      </ErrorBoundary>
     )
 
     return wrap

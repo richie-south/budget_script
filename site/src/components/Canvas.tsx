@@ -6,7 +6,12 @@ interface CanvasProps {
   notes: Note[]
   activeNoteId: string | null
   onSelectNote: (id: string) => void
-  onCreateNote: (position: { x: number; y: number; width: number; height: number }) => void
+  onCreateNote: (position: {
+    x: number
+    y: number
+    width: number
+    height: number
+  }) => void
   onUpdateNote: (id: string, updates: Partial<Note>) => void
   onDeleteNote: (id: string) => void
 }
@@ -31,18 +36,49 @@ export function Canvas({
 }: CanvasProps) {
   const [tool, setTool] = useState<Tool>("select")
   const [dragMode, setDragMode] = useState<DragMode>(null)
-  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null)
-  const [currentDrag, setCurrentDrag] = useState<{ x: number; y: number } | null>(null)
+  const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
+    null,
+  )
+  const [currentDrag, setCurrentDrag] = useState<{
+    x: number
+    y: number
+  } | null>(null)
   const [activeDragNoteId, setActiveDragNoteId] = useState<string | null>(null)
 
   const canvasRef = useRef<HTMLDivElement>(null)
 
   // Refs so document-level event listeners always see fresh values
-  const stateRef = useRef({ dragMode, dragStart, currentDrag, activeDragNoteId, notes, tool })
-  stateRef.current = { dragMode, dragStart, currentDrag, activeDragNoteId, notes, tool }
+  const stateRef = useRef({
+    dragMode,
+    dragStart,
+    currentDrag,
+    activeDragNoteId,
+    notes,
+    tool,
+  })
+  stateRef.current = {
+    dragMode,
+    dragStart,
+    currentDrag,
+    activeDragNoteId,
+    notes,
+    tool,
+  }
 
   const callbacksRef = useRef({ onCreateNote, onUpdateNote })
   callbacksRef.current = { onCreateNote, onUpdateNote }
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeNoteId) return
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === "INPUT" || tag === "TEXTAREA") return
+      if (e.key === "1") setTool("select")
+      else if (e.key === "2") setTool("create")
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [activeNoteId])
 
   const getMousePos = useCallback((e: MouseEvent | React.MouseEvent) => {
     if (!canvasRef.current) return { x: 0, y: 0 }
@@ -70,11 +106,18 @@ export function Canvas({
       e.preventDefault()
       const pos = getMousePos(e)
       const mode = stateRef.current.dragMode
-      setCurrentDrag(mode === "create" ? { x: snap(pos.x), y: snap(pos.y) } : pos)
+      setCurrentDrag(
+        mode === "create" ? { x: snap(pos.x), y: snap(pos.y) } : pos,
+      )
     }
 
     const handleMouseUp = (e: MouseEvent) => {
-      const { dragMode: mode, dragStart: start, activeDragNoteId: noteId, notes: currentNotes } = stateRef.current
+      const {
+        dragMode: mode,
+        dragStart: start,
+        activeDragNoteId: noteId,
+        notes: currentNotes,
+      } = stateRef.current
       const pos = getMousePos(e)
       const final = mode === "create" ? { x: snap(pos.x), y: snap(pos.y) } : pos
 
@@ -86,7 +129,7 @@ export function Canvas({
         callbacksRef.current.onCreateNote({ x, y, width, height })
         setTool("select")
       } else if (mode === "move" && noteId && start) {
-        const note = currentNotes.find(n => n.id === noteId)
+        const note = currentNotes.find((n) => n.id === noteId)
         if (note) {
           callbacksRef.current.onUpdateNote(noteId, {
             x: snap(note.x + final.x - start.x),
@@ -94,7 +137,7 @@ export function Canvas({
           })
         }
       } else if (mode === "resize" && noteId && start) {
-        const note = currentNotes.find(n => n.id === noteId)
+        const note = currentNotes.find((n) => n.id === noteId)
         if (note) {
           callbacksRef.current.onUpdateNote(noteId, {
             width: Math.max(MIN_SIZE, snap(note.width + final.x - start.x)),
@@ -114,7 +157,11 @@ export function Canvas({
     }
   }, [dragMode, getMousePos, endDrag])
 
-  const beginDrag = (e: React.MouseEvent, mode: "move" | "resize", noteId: string) => {
+  const beginDrag = (
+    e: React.MouseEvent,
+    mode: "move" | "resize",
+    noteId: string,
+  ) => {
     if (tool !== "select") return
     e.preventDefault()
     e.stopPropagation()
@@ -173,16 +220,43 @@ export function Canvas({
         <button
           className={`tool-btn ${tool === "select" ? "active" : ""}`}
           onClick={() => setTool("select")}
-          title="Select Tool (V)"
+          title="Select Tool (1)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/><path d="M13 13l6 6"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" />
+            <path d="M13 13l6 6" />
+          </svg>
+          <span className="tool-shortcut">1</span>
         </button>
         <button
           className={`tool-btn ${tool === "create" ? "active" : ""}`}
           onClick={() => setTool("create")}
-          title="Create Note Tool (R)"
+          title="Create Note Tool (2)"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          </svg>
+          <span className="tool-shortcut">2</span>
         </button>
       </div>
 
@@ -197,7 +271,8 @@ export function Canvas({
         onMouseDown={handleCanvasMouseDown}
       >
         {notes.map((note) => {
-          const isBeingDragged = activeDragNoteId === note.id && dragStart && currentDrag
+          const isBeingDragged =
+            activeDragNoteId === note.id && dragStart && currentDrag
 
           let noteStyle: React.CSSProperties = {
             left: note.x,
@@ -212,7 +287,7 @@ export function Canvas({
             if (dragMode === "move") {
               noteStyle.left = note.x + dx
               noteStyle.top = note.y + dy
-              noteStyle.opacity = 0.6
+              noteStyle.opacity = 0.9
               noteStyle.zIndex = 50
             } else if (dragMode === "resize") {
               noteStyle.width = Math.max(MIN_SIZE, note.width + dx)
@@ -277,10 +352,7 @@ function NoteBox({
       }}
       onMouseDownCapture={() => onSelect()}
     >
-      <div
-        className="note-box-header"
-        onMouseDown={onDragStart}
-      >
+      <div className="note-box-header" onMouseDown={onDragStart}>
         <div className="drag-handle">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
             <circle cx="8" cy="4" r="2" />
@@ -298,12 +370,21 @@ function NoteBox({
           onChange={(e) => onUpdateTitle(e.target.value)}
           onMouseDown={(e) => e.stopPropagation()}
         />
-        <button className="note-box-delete" onMouseDown={(e) => e.stopPropagation()} onClick={(e) => {
-          e.stopPropagation()
-          onDelete()
-        }}>×</button>
+        <button
+          className="note-box-delete"
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation()
+            onDelete()
+          }}
+        >
+          ×
+        </button>
       </div>
-      <div className="note-box-content" onMouseDown={(e) => e.stopPropagation()}>
+      <div
+        className="note-box-content"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
         <Editor
           key={note.id}
           initialContent={note.content}
@@ -311,10 +392,7 @@ function NoteBox({
           onMetricsChange={() => {}}
         />
       </div>
-      <div
-        className="resize-handle"
-        onMouseDown={onResizeStart}
-      />
+      <div className="resize-handle" onMouseDown={onResizeStart} />
     </div>
   )
 }

@@ -54,15 +54,13 @@ export class PieChartAnnotationWidget extends WidgetType {
     // Render React component into the DOM element
     const root = createRoot(wrap)
     root.render(
-      <CollapsibleBox id={this.id} title="Pie Chart">
-        <div className="cm-piechart-anno">
-          <ErrorBoundary
-            fallback={<div className="error-ui">Critical system failure.</div>}
-          >
+      <ErrorBoundary fallback={<div className="error-ui">Failed to render pie chart.</div>}>
+        <CollapsibleBox id={this.id} title="Pie Chart">
+          <div className="cm-piechart-anno">
             <Pie chartData={chartData} />
-          </ErrorBoundary>
-        </div>
-      </CollapsibleBox>,
+          </div>
+        </CollapsibleBox>
+      </ErrorBoundary>,
     )
 
     return wrap

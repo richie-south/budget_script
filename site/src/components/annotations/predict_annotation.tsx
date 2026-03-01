@@ -2,6 +2,7 @@ import { WidgetType } from "@codemirror/view"
 import { ResponsiveLine } from "@nivo/line"
 import { createRoot } from "react-dom/client"
 import { CollapsibleBox } from "./box"
+import { ErrorBoundary } from "../error"
 
 export class LineChartAnnotationWidget extends WidgetType {
   private id: string
@@ -84,84 +85,86 @@ export class LineChartAnnotationWidget extends WidgetType {
     }
 
     root.render(
-      <CollapsibleBox id={this.id} title="Prediction Chart">
-        <div
-          className="cm-piechart-anno"
-          style={{ height: "260px", width: "100%" }}
-        >
-          <div style={{ width: "100%", height: "100%" }}>
-            <ResponsiveLine
-              data={this.data}
-              theme={chartTheme}
-              colors={["#6ee7b7", "#34d399", "#fbbf24"]}
-              margin={{ top: 20, right: 30, bottom: 80, left: 50 }}
-              xScale={{ type: "point" }}
-              yScale={{
-                type: "linear",
-                min: "auto",
-                max: "auto",
-                stacked: false,
-                reverse: false,
-              }}
-              curve="monotoneX"
-              axisTop={null}
-              axisRight={null}
-              axisBottom={{
-                tickSize: 5,
-                tickPadding: 5,
-                tickRotation: 0,
-                legend: "Time",
-                legendOffset: 40,
-                legendPosition: "middle",
-                tickValues: tickValues,
-              }}
-              axisLeft={{
-                tickSize: 5,
-                tickPadding: 5,
-                tickRotation: 0,
-                legend: "Value",
-                legendOffset: -40,
-                legendPosition: "middle",
-              }}
-              enableGridX={false}
-              enableGridY={true}
-              pointSize={dataLength > 50 ? 0 : 6}
-              pointColor="#1a1a24"
-              pointBorderWidth={2}
-              pointBorderColor={{ from: "seriesColor" }}
-              useMesh={true}
-              enableArea={true}
-              areaOpacity={0.05}
-              legends={[
-                {
-                  anchor: "bottom",
-                  direction: "row",
-                  justify: false,
-                  translateX: 0,
-                  translateY: 70,
-                  itemsSpacing: 10,
-                  itemDirection: "left-to-right",
-                  itemWidth: 80,
-                  itemHeight: 20,
-                  itemOpacity: 0.75,
-                  symbolSize: 10,
-                  symbolShape: "circle",
-                  itemTextColor: "#8888a0",
-                  effects: [
-                    {
-                      on: "hover",
-                      style: {
-                        itemBackground: "rgba(255, 255, 255, .03)",
-                        itemOpacity: 1,
+      <ErrorBoundary fallback={<div className="error-ui">Failed to render prediction chart.</div>}>
+        <CollapsibleBox id={this.id} title="Prediction Chart">
+          <div
+            className="cm-piechart-anno"
+            style={{ height: "260px", width: "100%" }}
+          >
+            <div style={{ width: "100%", height: "100%" }}>
+              <ResponsiveLine
+                data={this.data}
+                theme={chartTheme}
+                colors={["#6ee7b7", "#34d399", "#fbbf24"]}
+                margin={{ top: 20, right: 30, bottom: 80, left: 50 }}
+                xScale={{ type: "point" }}
+                yScale={{
+                  type: "linear",
+                  min: "auto",
+                  max: "auto",
+                  stacked: false,
+                  reverse: false,
+                }}
+                curve="monotoneX"
+                axisTop={null}
+                axisRight={null}
+                axisBottom={{
+                  tickSize: 5,
+                  tickPadding: 5,
+                  tickRotation: 0,
+                  legend: "Time",
+                  legendOffset: 40,
+                  legendPosition: "middle",
+                  tickValues: tickValues,
+                }}
+                axisLeft={{
+                  tickSize: 5,
+                  tickPadding: 5,
+                  tickRotation: 0,
+                  legend: "Value",
+                  legendOffset: -40,
+                  legendPosition: "middle",
+                }}
+                enableGridX={false}
+                enableGridY={true}
+                pointSize={dataLength > 50 ? 0 : 6}
+                pointColor="#1a1a24"
+                pointBorderWidth={2}
+                pointBorderColor={{ from: "seriesColor" }}
+                useMesh={true}
+                enableArea={true}
+                areaOpacity={0.05}
+                legends={[
+                  {
+                    anchor: "bottom",
+                    direction: "row",
+                    justify: false,
+                    translateX: 0,
+                    translateY: 70,
+                    itemsSpacing: 10,
+                    itemDirection: "left-to-right",
+                    itemWidth: 80,
+                    itemHeight: 20,
+                    itemOpacity: 0.75,
+                    symbolSize: 10,
+                    symbolShape: "circle",
+                    itemTextColor: "#8888a0",
+                    effects: [
+                      {
+                        on: "hover",
+                        style: {
+                          itemBackground: "rgba(255, 255, 255, .03)",
+                          itemOpacity: 1,
+                        },
                       },
-                    },
-                  ],
-                },
-              ]}
-            />
+                    ],
+                  },
+                ]}
+              />
+            </div>
           </div>
-        </div>
-      </CollapsibleBox>,
+        </CollapsibleBox>
+      </ErrorBoundary>,
     )
 
     return wrap

@@ -2,6 +2,7 @@ import { WidgetType } from "@codemirror/view"
 import { ResponsiveBar } from "@nivo/bar"
 import { createRoot } from "react-dom/client"
 import { CollapsibleBox } from "./box"
+import { ErrorBoundary } from "../error"
 
 export interface BarChartDataItem {
   label: string
@@ -50,11 +51,13 @@ export class BarChartAnnotationWidget extends WidgetType {
 
     const root = createRoot(wrap)
     root.render(
-      <CollapsibleBox id={this.id} title="Bar Chart">
-        <div className="cm-barchart-anno">
-          <Bar chartData={chartData} />
-        </div>
-      </CollapsibleBox>,
+      <ErrorBoundary fallback={<div className="error-ui">Failed to render bar chart.</div>}>
+        <CollapsibleBox id={this.id} title="Bar Chart">
+          <div className="cm-barchart-anno">
+            <Bar chartData={chartData} />
+          </div>
+        </CollapsibleBox>
+      </ErrorBoundary>,
     )
 
     return wrap
