@@ -57,6 +57,10 @@ export class PieChartAnnotationWidget extends WidgetType {
     return wrap
   }
 
+  ignoreEvent() {
+    return true
+  }
+
   destroy(dom: HTMLElement) {
     // Note: In a production app, you'd want to properly unmount the React root
     // For simplicity, we're letting React handle cleanup

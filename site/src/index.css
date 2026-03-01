@@ -1,37 +1,40 @@
 :root {
-  --bg-deep: #f5faf9;
-  --bg-surface: #ffffff;
-  --bg-elevated: #f0f7f5;
-  --bg-light: #e5efed;
-  --bg-hover: #eaf3f1;
-  --border: #d0e0dc;
-  --border-subtle: #e0ebe8;
-  --text-primary: #1a2e2a;
-  --text-secondary: #4a6560;
-  --text-muted: #7a9590;
-  --accent: #4EB896;
-  --accent-dim: #3da580;
-  --accent-secondary: #5CBABA;
-  --accent-bg: rgba(78, 184, 150, 0.12);
-  --accent-secondary-bg: rgba(92, 186, 186, 0.1);
-  --error: #e05555;
-  --error-bg: rgba(224, 85, 85, 0.1);
-  --warning: #d9a030;
+  /* Main Background - Light & Clean */
+  --bg-deep: #f4f4f5;
+  --bg-surface: #ffffff; /* Kept for other UI elements if any */
+  
+  /* Dark Box Theme */
+  --box-bg: #18181b;
+  --box-header-bg: #27272a;
+  --box-border: #3f3f46;
+  --box-text-primary: #e4e4e7;
+  --box-text-secondary: #a1a1aa;
+  --box-text-muted: #71717a;
+  
+  /* Accents - Pop colors for "fun" */
+  --accent: #34d399; /* Emerald 400 */
+  --accent-dim: #10b981;
+  --accent-secondary: #2dd4bf; /* Teal 400 */
+  --accent-bg: rgba(52, 211, 153, 0.15);
+  --accent-secondary-bg: rgba(45, 212, 191, 0.15);
+  
+  --error: #fb7185; /* Rose 400 */
+  --error-bg: rgba(251, 113, 133, 0.15);
+  --warning: #fbbf24; /* Amber 400 */
+
+  /* Layout */
   --sidebar-width: 280px;
   --header-height: 52px;
 }
 
 progress {
   appearance: none;
-  /* Hides default styling */
   -webkit-appearance: none;
   width: 100%;
-  height: 10px;
+  height: 12px; /* Slightly thicker */
   border: none;
-  /* Removes default border */
   border-radius: 999px;
-  background-color: var(--bg-light);
-  /* The track */
+  background-color: var(--box-header-bg); /* Darker track */
   overflow: hidden;
 }
 
@@ -58,15 +61,9 @@ progress::-moz-progress-bar {
   box-shadow: 0 0 15px var(--accent-bg);
 }
 
-/* Stripe Animation */
 @keyframes moveStripes {
-  from {
-    background-position: 0 0;
-  }
-
-  to {
-    background-position: 20px 0;
-  }
+  from { background-position: 0 0; }
+  to { background-position: 20px 0; }
 }
 
 * {
@@ -75,14 +72,12 @@ progress::-moz-progress-bar {
   padding: 0;
 }
 
-body,
-html {
+body, html {
   height: 100%;
   width: 100%;
-  font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont,
-    sans-serif;
+  font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-deep);
-  color: var(--text-primary);
+  color: #18181b; /* Default text for outside boxes */
   overflow: hidden;
 }
 
@@ -112,39 +107,40 @@ html {
   bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 8px;
+  background: var(--box-bg); /* Dark toolbar to match boxes */
+  border: 1px solid var(--box-border);
+  border-radius: 16px;
+  padding: 10px;
   display: flex;
-  gap: 8px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   z-index: 100;
 }
 
 .tool-btn {
-  width: 36px;
-  height: 36px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
   background: transparent;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: pointer;
-  color: var(--text-secondary);
-  transition: all 0.15s ease;
+  color: var(--box-text-secondary);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .tool-btn:hover {
-  background: var(--bg-hover);
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--box-text-primary);
+  transform: translateY(-2px);
 }
 
 .tool-btn.active {
   background: var(--accent-bg);
   color: var(--accent);
-  border-color: rgba(78, 184, 150, 0.3);
+  border-color: rgba(52, 211, 153, 0.3);
 }
 
 .canvas-area {
@@ -155,32 +151,45 @@ html {
   height: 100%;
 }
 
-/* Note Box */
+/* Note Box - Dark Mode Redesign */
 .note-box {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  background: var(--box-bg);
+  border: 1px solid var(--box-border);
+  border-radius: 20px; /* More rounded */
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+    0 2px 4px -1px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(255,255,255,0.05) inset; /* Inner highlight */
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  transition: box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.15s ease, transform 0.1s ease;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+
+  /* Override global variables for content inside the box */
+  --bg-surface: var(--box-bg);
+  --bg-elevated: var(--box-header-bg);
+  --border: var(--box-border);
+  --text-primary: var(--box-text-primary);
+  --text-secondary: var(--box-text-secondary);
+  --text-muted: var(--box-text-muted);
 }
 
 .note-box.active {
   border-color: var(--accent);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.2), 
+    0 10px 10px -5px rgba(0, 0, 0, 0.1);
   z-index: 10;
-  transform: translateY(-2px);
+  transform: translateY(-4px) scale(1.005); /* Slight pop */
 }
 
 .note-box-header {
-  height: 32px;
-  background: var(--bg-elevated);
-  border-bottom: 1px solid var(--border-subtle);
+  height: 44px; /* Larger header */
+  background: var(--box-header-bg);
+  border-bottom: 1px solid var(--box-border);
   display: flex;
   align-items: center;
-  padding: 0 8px;
+  padding: 0 12px;
   cursor: grab;
   justify-content: space-between;
 }
@@ -193,8 +202,8 @@ html {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-muted);
-  margin-right: 6px;
+  color: var(--box-text-muted);
+  margin-right: 8px;
   cursor: grab;
   opacity: 0.6;
   transition: opacity 0.15s ease;
@@ -202,15 +211,15 @@ html {
 
 .drag-handle:hover {
   opacity: 1;
-  color: var(--text-secondary);
+  color: var(--box-text-primary);
 }
 
 .note-box-title {
   background: transparent;
   border: none;
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: var(--text-primary);
+  color: var(--box-text-primary);
   width: 100%;
   outline: none;
   font-family: inherit;
@@ -220,19 +229,21 @@ html {
 .note-box-delete {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--box-text-muted);
   cursor: pointer;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   line-height: 1;
-  padding: 0 4px;
-  margin-left: 4px;
+  padding: 4px;
+  margin-left: 8px;
+  border-radius: 6px;
   opacity: 0.6;
-  transition: opacity 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .note-box-delete:hover {
   opacity: 1;
   color: var(--error);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .note-box-content {
@@ -240,7 +251,7 @@ html {
   min-height: 0;
   overflow: hidden;
   position: relative;
-  background: var(--bg-surface);
+  background: var(--box-bg);
 }
 
 .editor-container {
@@ -252,12 +263,13 @@ html {
   position: absolute;
   bottom: 0;
   right: 0;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   cursor: se-resize;
-  background: linear-gradient(135deg, transparent 50%, var(--border) 50%);
+  background: linear-gradient(135deg, transparent 50%, var(--box-border) 50%);
   opacity: 0.5;
   transition: opacity 0.15s ease;
+  border-bottom-right-radius: 18px; /* Match box radius */
 }
 
 .resize-handle:hover {
@@ -267,14 +279,14 @@ html {
 
 /* Editor adjustments for box */
 .note-box .cm-editor {
-  font-size: 14px;
+  font-size: 15px; /* Slightly larger text */
 }
 
 .note-box .cm-scroller {
-  padding: 12px !important;
+  padding: 16px !important; /* Larger padding */
 }
 
-/* CodeMirror Overrides */
+/* CodeMirror Overrides for Dark Mode */
 .cm-editor {
   height: 100% !important;
   font-family: "JetBrains Mono", monospace;
@@ -293,15 +305,16 @@ html {
 .cm-editor .cm-gutters {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--box-text-muted);
 }
 
 .cm-editor .cm-activeLineGutter {
   background: transparent;
+  color: var(--box-text-primary);
 }
 
 .cm-editor .cm-activeLine {
-  background: rgba(78, 184, 150, 0.06);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .cm-focused {
@@ -309,7 +322,7 @@ html {
 }
 
 .cm-editor .cm-line {
-  color: var(--text-primary);
+  color: var(--box-text-primary);
 }
 
 .cm-editor .cm-cursor {
@@ -318,20 +331,20 @@ html {
 
 .cm-editor .cm-selectionBackground,
 .cm-editor .cm-content ::selection {
-  background: rgba(78, 184, 150, 0.2) !important;
+  background: rgba(52, 211, 153, 0.2) !important;
 }
 
-/* Annotations */
+/* Annotations - Dark Mode Adaptations */
 .cm-budget-anno {
   color: var(--accent);
   font-weight: 500;
   margin-left: 16px;
   font-style: normal;
-  background: var(--accent-bg);
-  padding: 0px 10px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  border: 1px solid rgba(159, 231, 207, 0.25);
+  background: rgba(52, 211, 153, 0.1);
+  padding: 2px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(52, 211, 153, 0.2);
   font-family: "JetBrains Mono", monospace;
 }
 
@@ -340,11 +353,11 @@ html {
   font-weight: 500;
   margin-left: 16px;
   font-style: normal;
-  background: var(--error-bg);
-  padding: 3px 10px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  border: 1px solid rgba(240, 128, 128, 0.25);
+  background: rgba(251, 113, 133, 0.1);
+  padding: 4px 12px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(251, 113, 133, 0.2);
   font-family: "JetBrains Mono", monospace;
 }
 
@@ -352,11 +365,11 @@ html {
   color: var(--accent);
   font-weight: 500;
   font-style: normal;
-  background: var(--accent-bg);
-  padding: 12px 12px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  border: 1px solid rgba(159, 231, 207, 0.25);
+  background: rgba(52, 211, 153, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  border: 1px solid rgba(52, 211, 153, 0.1);
   font-family: "JetBrains Mono", monospace;
   display: flex;
   justify-content: center;
@@ -365,11 +378,10 @@ html {
 
 .cm-piechart-anno,
 .cm-barchart-anno {
-  background: var(--bg-elevated);
-  padding: 16px;
-  border-radius: 10px;
-  border: 1px solid var(--border);
-
+  background: var(--box-header-bg);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--box-border);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -377,5 +389,43 @@ html {
 
 /* Annotation Wrapper */
 .cm-annotation-wrapper {
+  margin-top: 12px;
+}
+
+/* Collapsible Box (Annotations) */
+.collapsible-box {
+  margin-top: 8px;
+}
+
+.collapsible-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--box-text-muted);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.75rem;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.collapsible-toggle:hover {
+  color: var(--box-text-secondary);
+}
+
+.collapsible-icon {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.collapsible-icon.open {
+  transform: rotate(90deg);
+}
+
+.collapsible-label {
+  opacity: 0.8;
+}
+
+.collapsible-content {
   margin-top: 8px;
 }

@@ -199,7 +199,7 @@ export const Editor = memo(
         },
         ".cm-gutters": {
           backgroundColor: "transparent",
-          color: "var(--text-muted)",
+          color: "var(--box-text-muted)",
           border: "none",
         },
         ".cm-activeLineGutter": {

@@ -29,33 +29,39 @@ export function CollapsibleBox({
     localStorage.setItem(storageKey, String(isOpen))
   }, [isOpen, storageKey])
 
-  const toggle = () => setIsOpen((prev) => !prev)
+  const toggle = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsOpen((prev) => !prev)
+  }
 
   return (
-    <div className="collapsible-box">
-      <button
-        className="collapsible-header"
+    <div className="collapsible-box" data-open={isOpen}>
+      <span
+        className="collapsible-toggle"
         onClick={toggle}
+        onMouseDown={(e) => e.stopPropagation()}
+        role="button"
         aria-expanded={isOpen}
       >
-        <span className="collapsible-title">{title}</span>
         <svg
           className={`collapsible-icon ${isOpen ? "open" : ""}`}
-          width="16"
-          height="16"
+          width="10"
+          height="10"
           viewBox="0 0 16 16"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
-            d="M4 6L8 10L12 6"
+            d="M6 4L10 8L6 12"
             stroke="currentColor"
             strokeWidth="1.5"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
         </svg>
-      </button>
+        <span className="collapsible-label">{title}</span>
+      </span>
       {isOpen && <div className="collapsible-content">{children}</div>}
     </div>
   )

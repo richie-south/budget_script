@@ -12,6 +12,10 @@ export class LineChartAnnotationWidget extends WidgetType {
     this.id = `predict-${line}`
   }
 
+  ignoreEvent() {
+    return true
+  }
+
   toDOM() {
     const wrap = document.createElement("div")
     wrap.setAttribute("aria-hidden", "true")

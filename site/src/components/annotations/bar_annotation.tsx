@@ -60,6 +60,10 @@ export class BarChartAnnotationWidget extends WidgetType {
     return wrap
   }
 
+  ignoreEvent() {
+    return true
+  }
+
   destroy(dom: HTMLElement) {
     // React handles cleanup in modern versions, but root.unmount()
     // is recommended if storing the root reference

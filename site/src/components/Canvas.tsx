@@ -159,7 +159,7 @@ export function Canvas({
           width,
           height,
           border: "2px dashed var(--accent)",
-          backgroundColor: "rgba(110, 231, 183, 0.1)",
+          backgroundColor: "var(--accent-bg)",
           pointerEvents: "none",
           zIndex: 999,
         }}
@@ -191,11 +191,7 @@ export function Canvas({
         className="canvas-area"
         style={{
           backgroundSize: `${GRID_SIZE}px ${GRID_SIZE}px`,
-          backgroundImage: `
-            linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
-            linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px),
-            radial-gradient(circle, rgba(0,0,0,0.08) 1px, transparent 1px)
-          `,
+          backgroundImage: `radial-gradient(circle, rgba(0,0,0,0.08) 1.5px, transparent 1.5px)`,
           cursor: tool === "create" ? "crosshair" : "default",
         }}
         onMouseDown={handleCanvasMouseDown}
