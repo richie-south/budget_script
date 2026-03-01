@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react"
-import { Note } from "../hooks/useNotes"
+import { Canvas as CanvasType, Note } from "../hooks/useCanvases"
 import { Editor } from "./Editor"
 
 interface CanvasProps {
@@ -14,6 +14,13 @@ interface CanvasProps {
   }) => void
   onUpdateNote: (id: string, updates: Partial<Note>) => void
   onDeleteNote: (id: string) => void
+
+  canvases: CanvasType[]
+  activeCanvasId: string
+  onSelectCanvas: (id: string) => void
+  onCreateCanvas: () => void
+  onDeleteCanvas: (id: string) => void
+  onUpdateCanvasName: (id: string, name: string) => void
 }
 
 type Tool = "select" | "create"
@@ -33,6 +40,12 @@ export function Canvas({
   onCreateNote,
   onUpdateNote,
   onDeleteNote,
+  canvases,
+  activeCanvasId,
+  onSelectCanvas,
+  onCreateCanvas,
+  onDeleteCanvas,
+  onUpdateCanvasName,
 }: CanvasProps) {
   const [tool, setTool] = useState<Tool>("select")
   const [dragMode, setDragMode] = useState<DragMode>(null)
@@ -258,6 +271,45 @@ export function Canvas({
           </svg>
           <span className="tool-shortcut">2</span>
         </button>
+
+        <div className="toolbar-divider" />
+
+        <div className="canvas-list">
+          {canvases.map((canvas) => (
+            <div
+              key={canvas.id}
+              className={`canvas-tab ${activeCanvasId === canvas.id ? "active" : ""}`}
+              onClick={() => onSelectCanvas(canvas.id)}
+            >
+              <input
+                className="canvas-name-input"
+                value={canvas.name}
+                onChange={(e) => onUpdateCanvasName(canvas.id, e.target.value)}
+                onClick={(e) => e.stopPropagation()}
+                onMouseDown={(e) => e.stopPropagation()}
+              />
+              {canvases.length > 1 && (
+                <button
+                  className="canvas-delete-btn"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onDeleteCanvas(canvas.id)
+                  }}
+                  title="Delete Canvas"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+          ))}
+          <button
+            className="add-canvas-btn"
+            onClick={onCreateCanvas}
+            title="New Canvas"
+          >
+            +
+          </button>
+        </div>
       </div>
 
       <div
