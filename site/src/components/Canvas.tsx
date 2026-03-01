@@ -275,33 +275,41 @@ export function Canvas({
         <div className="toolbar-divider" />
 
         <div className="canvas-list">
-          {canvases.map((canvas) => (
-            <div
-              key={canvas.id}
-              className={`canvas-tab ${activeCanvasId === canvas.id ? "active" : ""}`}
-              onClick={() => onSelectCanvas(canvas.id)}
-            >
-              <input
-                className="canvas-name-input"
-                value={canvas.name}
-                onChange={(e) => onUpdateCanvasName(canvas.id, e.target.value)}
-                onClick={(e) => e.stopPropagation()}
-                onMouseDown={(e) => e.stopPropagation()}
-              />
-              {canvases.length > 1 && (
-                <button
-                  className="canvas-delete-btn"
+          {canvases.map((canvas) => {
+            const isActive = activeCanvasId === canvas.id
+            return (
+              <div
+                key={canvas.id}
+                className={`canvas-tab ${isActive ? "active" : ""}`}
+                onClick={() => onSelectCanvas(canvas.id)}
+              >
+                <input
+                  className="canvas-name-input"
+                  value={canvas.name}
+                  readOnly={!isActive}
+                  onChange={(e) => onUpdateCanvasName(canvas.id, e.target.value)}
                   onClick={(e) => {
-                    e.stopPropagation()
-                    onDeleteCanvas(canvas.id)
+                    if (isActive) e.stopPropagation()
                   }}
-                  title="Delete Canvas"
-                >
-                  ×
-                </button>
-              )}
-            </div>
-          ))}
+                  onMouseDown={(e) => {
+                    if (isActive) e.stopPropagation()
+                  }}
+                />
+                {canvases.length > 1 && (
+                  <button
+                    className="canvas-delete-btn"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onDeleteCanvas(canvas.id)
+                    }}
+                    title="Delete Canvas"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            )
+          })}
           <button
             className="add-canvas-btn"
             onClick={onCreateCanvas}
