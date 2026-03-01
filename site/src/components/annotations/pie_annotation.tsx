@@ -2,6 +2,7 @@ import { WidgetType } from "@codemirror/view"
 import { ResponsivePie } from "@nivo/pie"
 import { createRoot } from "react-dom/client"
 import { CollapsibleBox } from "./box"
+import { ErrorBoundary } from "../error"
 
 export interface PieChartDataItem {
   label: string
@@ -21,7 +22,10 @@ const pieChartColors = [
 export class PieChartAnnotationWidget extends WidgetType {
   private id: string
 
-  constructor(readonly data: PieChartDataItem[], readonly line: number) {
+  constructor(
+    readonly data: PieChartDataItem[],
+    readonly line: number,
+  ) {
     super()
     // Create a stable ID based on line and data hash
     this.id = `pie-${line}-${this.hashData()}`
@@ -37,21 +41,28 @@ export class PieChartAnnotationWidget extends WidgetType {
     wrap.className = "cm-annotation-wrapper"
 
     // Transform data for Nivo format
-    const chartData = this.data.map((item, index) => ({
-      id: item.label,
-      label: item.label ?? String(item.value),
-      value: item.value,
-      color: pieChartColors[index % pieChartColors.length],
-    }))
+    const chartData =
+      this.data?.map((item, index) => ({
+        id: item.label,
+        label: item.label ?? String(item.value),
+        value: item.value,
+        color: pieChartColors[index % pieChartColors.length],
+      })) ?? []
+
+    console.log("chartData", chartData)
 
     // Render React component into the DOM element
     const root = createRoot(wrap)
     root.render(
       <CollapsibleBox id={this.id} title="Pie Chart">
         <div className="cm-piechart-anno">
-          <Pie chartData={chartData} />
+          <ErrorBoundary
+            fallback={<div className="error-ui">Critical system failure.</div>}
+          >
+            <Pie chartData={chartData} />
+          </ErrorBoundary>
         </div>
-      </CollapsibleBox>
+      </CollapsibleBox>,
     )
 
     return wrap
@@ -91,7 +102,7 @@ function Pie({
         borderColor={{ from: "color", modifiers: [["darker", 0.3]] }}
         enableArcLinkLabels={true}
         arcLinkLabelsSkipAngle={10}
-        arcLinkLabelsTextColor="var(--text-secondary)"
+        arcLinkLabelsTextColor="var(--box-text-secondary)"
         arcLinkLabelsThickness={1}
         arcLinkLabelsColor={{ from: "color" }}
         arcLabelsSkipAngle={10}

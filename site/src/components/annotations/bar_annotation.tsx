@@ -119,12 +119,12 @@ function Bar({
           text: {
             fontSize: 11,
             fontFamily: "'JetBrains Mono', monospace",
-            fill: "var(--text-secondary)",
+            fill: "var(--box-text-secondary)",
           },
           axis: {
             ticks: {
               line: { stroke: "var(--border)" },
-              text: { fill: "var(--text-secondary)" },
+              text: { fill: "var(--box-text-secondary)" },
             },
             domain: {
               line: { stroke: "var(--border)" },

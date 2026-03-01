@@ -6,7 +6,10 @@ import { CollapsibleBox } from "./box"
 export class LineChartAnnotationWidget extends WidgetType {
   private id: string
 
-  constructor(readonly data: any[], readonly line: number) {
+  constructor(
+    readonly data: any[],
+    readonly line: number,
+  ) {
     super()
     // Create a stable ID based on line
     this.id = `predict-${line}`
@@ -82,7 +85,10 @@ export class LineChartAnnotationWidget extends WidgetType {
 
     root.render(
       <CollapsibleBox id={this.id} title="Prediction Chart">
-        <div className="cm-piechart-anno" style={{ height: "260px", width: "100%" }}>
+        <div
+          className="cm-piechart-anno"
+          style={{ height: "260px", width: "100%" }}
+        >
           <div style={{ width: "100%", height: "100%" }}>
             <ResponsiveLine
               data={this.data}
@@ -155,7 +161,7 @@ export class LineChartAnnotationWidget extends WidgetType {
             />
           </div>
         </div>
-      </CollapsibleBox>
+      </CollapsibleBox>,
     )
 
     return wrap
