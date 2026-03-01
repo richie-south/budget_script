@@ -1,8 +1,9 @@
 :root {
   /* Main Background - Light & Clean */
   --bg-deep: #f4f4f5;
-  --bg-surface: #ffffff; /* Kept for other UI elements if any */
-  
+  --bg-surface: #ffffff;
+  /* Kept for other UI elements if any */
+
   /* Dark Box Theme */
   --box-bg: #18181b;
   --box-header-bg: #27272a;
@@ -10,17 +11,21 @@
   --box-text-primary: #e4e4e7;
   --box-text-secondary: #a1a1aa;
   --box-text-muted: #71717a;
-  
+
   /* Accents - Pop colors for "fun" */
-  --accent: #34d399; /* Emerald 400 */
+  --accent: #34d399;
+  /* Emerald 400 */
   --accent-dim: #10b981;
-  --accent-secondary: #2dd4bf; /* Teal 400 */
+  --accent-secondary: #2dd4bf;
+  /* Teal 400 */
   --accent-bg: rgba(52, 211, 153, 0.15);
   --accent-secondary-bg: rgba(45, 212, 191, 0.15);
-  
-  --error: #fb7185; /* Rose 400 */
+
+  --error: #fb7185;
+  /* Rose 400 */
   --error-bg: rgba(251, 113, 133, 0.15);
-  --warning: #fbbf24; /* Amber 400 */
+  --warning: #fbbf24;
+  /* Amber 400 */
 
   /* Layout */
   --sidebar-width: 280px;
@@ -31,10 +36,12 @@ progress {
   appearance: none;
   -webkit-appearance: none;
   width: 100%;
-  height: 12px; /* Slightly thicker */
+  height: 12px;
+  /* Slightly thicker */
   border: none;
   border-radius: 999px;
-  background-color: var(--box-header-bg); /* Darker track */
+  background-color: var(--box-header-bg);
+  /* Darker track */
   overflow: hidden;
 }
 
@@ -62,8 +69,13 @@ progress::-moz-progress-bar {
 }
 
 @keyframes moveStripes {
-  from { background-position: 0 0; }
-  to { background-position: 20px 0; }
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 20px 0;
+  }
 }
 
 * {
@@ -72,12 +84,14 @@ progress::-moz-progress-bar {
   padding: 0;
 }
 
-body, html {
+body,
+html {
   height: 100%;
   width: 100%;
   font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   background: var(--bg-deep);
-  color: #18181b; /* Default text for outside boxes */
+  color: #18181b;
+  /* Default text for outside boxes */
   overflow: hidden;
 }
 
@@ -107,7 +121,8 @@ body, html {
   bottom: 32px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--box-bg); /* Dark toolbar to match boxes */
+  background: var(--box-bg);
+  /* Dark toolbar to match boxes */
   border: 1px solid var(--box-border);
   border-radius: 16px;
   padding: 10px;
@@ -169,11 +184,13 @@ body, html {
 .note-box {
   background: var(--box-bg);
   border: 1px solid var(--box-border);
-  border-radius: 20px; /* More rounded */
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+  border-radius: 20px;
+  /* More rounded */
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(255,255,255,0.05) inset; /* Inner highlight */
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  /* Inner highlight */
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -190,15 +207,17 @@ body, html {
 
 .note-box.active {
   border-color: var(--accent);
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.2), 
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.2),
     0 10px 10px -5px rgba(0, 0, 0, 0.1);
   z-index: 10;
-  transform: translateY(-4px) scale(1.005); /* Slight pop */
+  transform: translateY(-4px) scale(1.005);
+  /* Slight pop */
 }
 
 .note-box-header {
-  height: 44px; /* Larger header */
+  height: 44px;
+  /* Larger header */
   background: var(--box-header-bg);
   border-bottom: 1px solid var(--box-border);
   display: flex;
@@ -283,7 +302,8 @@ body, html {
   background: linear-gradient(135deg, transparent 50%, var(--box-border) 50%);
   opacity: 0.5;
   transition: opacity 0.15s ease;
-  border-bottom-right-radius: 18px; /* Match box radius */
+  border-bottom-right-radius: 18px;
+  /* Match box radius */
 }
 
 .resize-handle:hover {
@@ -293,11 +313,13 @@ body, html {
 
 /* Editor adjustments for box */
 .note-box .cm-editor {
-  font-size: 15px; /* Slightly larger text */
+  font-size: 15px;
+  /* Slightly larger text */
 }
 
 .note-box .cm-scroller {
-  padding: 16px !important; /* Larger padding */
+  padding: 16px !important;
+  /* Larger padding */
 }
 
 /* CodeMirror Overrides for Dark Mode */
