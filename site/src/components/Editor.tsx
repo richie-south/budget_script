@@ -19,6 +19,8 @@ import {
   BarChartAnnotationWidget,
   BarChartDataItem,
 } from "./annotations/bar_annotation"
+import { budgetHighlightStyle, budgetLanguage } from "../lib/syntax"
+import { syntaxHighlighting } from "@codemirror/language"
 
 function getDecorations(state: EditorState): DecorationSet {
   const widgets: any[] = []
@@ -227,6 +229,8 @@ export const Editor = memo(
           EditorView.lineWrapping,
           updateListener,
           theme,
+          budgetLanguage,
+          syntaxHighlighting(budgetHighlightStyle),
         ],
       })
 
