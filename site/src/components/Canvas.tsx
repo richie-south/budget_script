@@ -25,6 +25,7 @@ interface CanvasProps {
 
 type Tool = "select" | "create"
 type DragMode = "create" | "move" | "resize" | null
+type PendingDelete = { type: "canvas"; id: string; name: string } | { type: "note"; id: string; name: string } | null
 
 const GRID_SIZE = 20
 const MIN_SIZE = GRID_SIZE * 4
@@ -48,6 +49,7 @@ export function Canvas({
   onUpdateCanvasName,
 }: CanvasProps) {
   const [tool, setTool] = useState<Tool>("select")
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete>(null)
   const [dragMode, setDragMode] = useState<DragMode>(null)
   const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(
     null,
@@ -295,12 +297,12 @@ export function Canvas({
                     if (isActive) e.stopPropagation()
                   }}
                 />
-                {canvases.length > 1 && (
+                {canvases.length > 1 && isActive && (
                   <button
                     className="canvas-delete-btn"
                     onClick={(e) => {
                       e.stopPropagation()
-                      onDeleteCanvas(canvas.id)
+                      setPendingDelete({ type: "canvas", id: canvas.id, name: canvas.name })
                     }}
                     title="Delete Canvas"
                   >
@@ -367,12 +369,28 @@ export function Canvas({
               onResizeStart={(e) => beginDrag(e, "resize", note.id)}
               onUpdateContent={(content) => onUpdateNote(note.id, { content })}
               onUpdateTitle={(title) => onUpdateNote(note.id, { title })}
-              onDelete={() => onDeleteNote(note.id)}
+              onDelete={() => setPendingDelete({ type: "note", id: note.id, name: note.title })}
             />
           )
         })}
         {renderGhostBox()}
       </div>
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title={pendingDelete.type === "canvas" ? "Delete Canvas" : "Delete Card"}
+          message={`Are you sure you want to delete "${pendingDelete.name}"? This cannot be undone.`}
+          onConfirm={() => {
+            if (pendingDelete.type === "canvas") {
+              onDeleteCanvas(pendingDelete.id)
+            } else {
+              onDeleteNote(pendingDelete.id)
+            }
+            setPendingDelete(null)
+          }}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
     </div>
   )
 }
@@ -388,6 +406,44 @@ interface NoteBoxProps {
   onUpdateContent: (content: string) => void
   onUpdateTitle: (title: string) => void
   onDelete: () => void
+}
+
+function ConfirmDialog({
+  title,
+  message,
+  onConfirm,
+  onCancel,
+}: {
+  title: string
+  message: string
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel()
+      else if (e.key === "Enter") onConfirm()
+    }
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [onConfirm, onCancel])
+
+  return (
+    <div className="confirm-overlay" onMouseDown={onCancel}>
+      <div className="confirm-dialog" onMouseDown={(e) => e.stopPropagation()}>
+        <h3 className="confirm-title">{title}</h3>
+        <p className="confirm-message">{message}</p>
+        <div className="confirm-actions">
+          <button className="confirm-btn cancel" onClick={onCancel}>
+            Cancel
+          </button>
+          <button className="confirm-btn delete" onClick={onConfirm}>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function NoteBox({
