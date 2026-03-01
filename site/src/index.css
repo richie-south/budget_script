@@ -461,7 +461,22 @@ html {
   opacity: 0.8;
 }
 
+.collapsible-content-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.25s ease;
+}
+
+.collapsible-box[data-open="true"] .collapsible-content-wrapper {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
 .collapsible-content {
+  overflow: hidden;
   margin-top: 8px;
 }
 
@@ -500,11 +515,15 @@ html {
   background: transparent;
   color: var(--box-text-secondary);
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   font-size: 0.8rem;
   font-weight: 500;
-  animation: tabAppear 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: tabAppear 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  overflow: hidden;
 }
 
 .canvas-tab:hover {
@@ -521,13 +540,16 @@ html {
 
 @keyframes tabAppear {
   from {
+    max-width: 0;
+    padding-left: 0;
+    padding-right: 0;
     opacity: 0;
-    transform: scale(0.8);
   }
-
   to {
+    max-width: 300px;
+    padding-left: 10px;
+    padding-right: 10px;
     opacity: 1;
-    transform: scale(1);
   }
 }
 

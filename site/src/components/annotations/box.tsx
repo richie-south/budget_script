@@ -62,7 +62,9 @@ export function CollapsibleBox({
         </svg>
         <span className="collapsible-label">{title}</span>
       </span>
-      {isOpen && <div className="collapsible-content">{children}</div>}
+      <div className="collapsible-content-wrapper">
+        <div className="collapsible-content">{children}</div>
+      </div>
     </div>
   )
 }
