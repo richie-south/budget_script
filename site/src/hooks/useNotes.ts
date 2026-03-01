@@ -4,6 +4,10 @@ export interface Note {
   id: string
   title: string
   content: string
+  x: number
+  y: number
+  width: number
+  height: number
   createdAt: string
   updatedAt: string
 }
@@ -31,11 +35,15 @@ export function useNotes() {
     }
   }, [notes])
 
-  const createNote = () => {
+  const createNote = (initialPosition?: { x: number; y: number; width: number; height: number }) => {
     const newNote: Note = {
       id: Date.now().toString(),
       title: "Untitled Note",
       content: "",
+      x: initialPosition?.x ?? 100,
+      y: initialPosition?.y ?? 100,
+      width: initialPosition?.width ?? 300,
+      height: initialPosition?.height ?? 200,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     }
