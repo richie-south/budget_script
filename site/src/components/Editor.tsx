@@ -1,5 +1,10 @@
 import { memo, useEffect, useRef } from "react"
-import { EditorView, Decoration, DecorationSet, ViewPlugin } from "@codemirror/view"
+import {
+  EditorView,
+  Decoration,
+  DecorationSet,
+  ViewPlugin,
+} from "@codemirror/view"
 import { EditorState, StateField } from "@codemirror/state"
 import { basicSetup } from "codemirror"
 import {
@@ -45,7 +50,10 @@ function getDecorations(state: EditorState): DecorationSet {
         const line = state.doc.line(result.line + 1)
         widgets.push(
           Decoration.widget({
-            widget: new PrintAnnotationWidget((result.value as any).value),
+            widget: new PrintAnnotationWidget(
+              result.value.value,
+              result.value.unit,
+            ),
             side: 1,
           }).range(line.to),
         )
