@@ -16,6 +16,9 @@ import {
   lex_IN,
   lex_FROM,
   LEX_MONTH,
+  lex_CHECKBOX,
+  lex_TITLE,
+  lex_SEPARATOR,
 } from '../lexer/lexer'
 import {tokenFactory, TokenFactory} from './token_factory'
 
@@ -122,6 +125,24 @@ export type SpreadExpression = {
   operator: string
 } & Base
 
+export const CHECKBOX_EXPRESSION = 'CheckboxExpression'
+export type CheckboxExpression = {
+  type: typeof CHECKBOX_EXPRESSION
+  symbol: string
+  checked: boolean
+} & Base
+
+export const TITLE_EXPRESSION = 'TitleExpression'
+export type TitleExpression = {
+  type: typeof TITLE_EXPRESSION
+  version: number
+} & Base
+
+export const SEPARATOR_EXPRESSION = 'SeparatorExpression'
+export type SeparatorExpression = {
+  type: typeof SEPARATOR_EXPRESSION
+} & Base
+
 export type Expression =
   | Identifier
   | NumericLiteral
@@ -132,6 +153,9 @@ export type Expression =
   | UnitExpression
   | SpanExpression
   | SpreadExpression
+  | CheckboxExpression
+  | TitleExpression
+  | SeparatorExpression
 
 export type AST = {type: 'Program'; body: Expression[]}
 
@@ -215,6 +239,27 @@ function parsePrimaryExpression(tokens: TokenFactory): Expression {
         tokens.at().position.line,
         tokens.at().position.start,
       )
+    case lex_CHECKBOX:
+      tokens.next()
+      return {
+        type: CHECKBOX_EXPRESSION,
+        symbol: token.value,
+        position: token.position,
+        checked: token.checked,
+      }
+    case lex_TITLE:
+      tokens.next()
+      return {
+        type: TITLE_EXPRESSION,
+        version: token.version,
+        position: token.position,
+      }
+    case lex_SEPARATOR:
+      tokens.next()
+      return {
+        type: SEPARATOR_EXPRESSION,
+        position: token.position,
+      }
   }
 }
 

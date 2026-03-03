@@ -13,6 +13,12 @@ export const lex_IN = 'In'
 export const lex_FROM = 'From'
 export const LEX_MONTH = 'Month'
 
+export const lex_CHECKBOX = 'Checkbox'
+export const lex_TITLE = 'Title'
+export const lex_SEPARATOR = 'Separator'
+export const lex_UNDERSCORE = 'Underscore'
+export const lex_DOUBLE_UNDERSCORE = 'DoubleUnderscore'
+
 const KEYWORDS = {
   in: lex_IN,
   from: lex_FROM,
@@ -45,6 +51,11 @@ type Type =
   | typeof lex_IN
   | typeof lex_FROM
   | typeof LEX_MONTH
+  | typeof lex_CHECKBOX
+  | typeof lex_TITLE
+  | typeof lex_SEPARATOR
+  | typeof lex_UNDERSCORE
+  | typeof lex_DOUBLE_UNDERSCORE
 
 type BaseToken = {
   position: Position
@@ -108,6 +119,28 @@ type MONTH_TOKEN = {
   type: typeof LEX_MONTH
 } & BaseToken
 
+type CHECKBOX_TOKEN = {
+  type: typeof lex_CHECKBOX
+  checked: boolean
+} & BaseToken
+
+type TITLE_TOKEN = {
+  type: typeof lex_TITLE
+  version: number
+} & BaseToken
+
+type SEPARATOR_TOKEN = {
+  type: typeof lex_SEPARATOR
+} & BaseToken
+
+type UNDERSCORE_TOKEN = {
+  type: typeof lex_UNDERSCORE
+} & BaseToken
+
+type DOUBLE_UNDERSCORE_TOKEN = {
+  type: typeof lex_DOUBLE_UNDERSCORE
+} & BaseToken
+
 type Position = {
   line: number
   start: number
@@ -129,6 +162,11 @@ export type Token =
   | IM_TOKEN
   | FROM_TOKEN
   | MONTH_TOKEN
+  | CHECKBOX_TOKEN
+  | TITLE_TOKEN
+  | SEPARATOR_TOKEN
+  | UNDERSCORE_TOKEN
+  | DOUBLE_UNDERSCORE_TOKEN
 
 function getPosition(position: Position): Position {
   return {
@@ -250,6 +288,52 @@ function isSpread(chars: string[]): boolean {
   return false
 }
 
+function isCheckbox(chars: string[]): boolean {
+  if (
+    chars[0] === '[' &&
+    (chars[1] === ' ' || chars[1] === 'x') &&
+    chars[2] === ']'
+  ) {
+    return true
+  }
+
+  return false
+}
+
+function isTitles(chars: string[], position: number): boolean {
+  if (position !== 0) {
+    return false
+  }
+
+  if ((chars[0] === '#' && chars[1] === ' ') || chars[1] === '#') {
+    return true
+  }
+
+  return false
+}
+
+function getTitleType(chars: string[]): TITLE_TOKEN['version'] {
+  let sum: TITLE_TOKEN['version'] = 0
+
+  for (const char of chars) {
+    if (char !== '#') {
+      return sum
+    }
+
+    sum += 1
+  }
+
+  return sum
+}
+
+function isDividerLine(chars: string[]): boolean {
+  if (chars[0] === '-' && chars[1] === '-' && chars[2] === '-') {
+    return true
+  }
+
+  return false
+}
+
 export function tokenize(sourceCode: string): Token[] {
   const chars = sourceCode.split('')
   const tokens = []
@@ -299,6 +383,22 @@ export function tokenize(sourceCode: string): Token[] {
 
           continue
         }
+      } else if (isDividerLine(chars)) {
+        const endPos = position + 3
+        tokens.push({
+          type: lex_SEPARATOR,
+          position: getPosition({
+            line,
+            start: position,
+            end: endPos,
+          }),
+        })
+
+        chars.shift()
+        chars.shift()
+        chars.shift()
+        position = endPos
+        continue
       }
       const endPos = position + char.length
       tokens.push(
@@ -320,15 +420,35 @@ export function tokenize(sourceCode: string): Token[] {
       )
       position = endPos
     } else if (char === '#') {
-      const endPos = position + char.length
-      tokens.push(
-        token(lex_HASH, chars.shift(), {
-          line,
-          start: position,
-          end: endPos,
-        }),
-      )
-      position = endPos
+      if (isTitles(chars, position)) {
+        const type = getTitleType(chars)
+        const endPos = position + type
+        tokens.push({
+          type: lex_TITLE,
+          version: type,
+          position: getPosition({
+            line,
+            start: position,
+            end: endPos,
+          }),
+        })
+
+        for (let index = 0; index < type; index++) {
+          chars.shift()
+        }
+
+        position = endPos
+      } else {
+        const endPos = position + char.length
+        tokens.push(
+          token(lex_HASH, chars.shift(), {
+            line,
+            start: position,
+            end: endPos,
+          }),
+        )
+        position = endPos
+      }
     } else if (char === '.' && isSpread(chars)) {
       tokens.push(
         token(lex_SPREAD, '...', {
@@ -337,6 +457,24 @@ export function tokenize(sourceCode: string): Token[] {
           end: position + 3,
         }),
       )
+    } else if (char === '[' && isCheckbox(chars)) {
+      const checked = chars[1]
+      const endPos = position + 3
+      tokens.push({
+        type: lex_CHECKBOX,
+        value: checked,
+        checked: checked === 'x',
+        position: getPosition({
+          line,
+          start: position,
+          end: endPos,
+        }),
+      })
+
+      chars.shift()
+      chars.shift()
+      chars.shift()
+      position = endPos
     } else {
       if (isAllowedName(char)) {
         let str = ''

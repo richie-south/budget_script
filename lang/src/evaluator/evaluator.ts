@@ -21,6 +21,12 @@ import {
   UNIT_EXPRESSION,
   UnitExpression,
   ModifyExpression,
+  CHECKBOX_EXPRESSION,
+  CheckboxExpression,
+  TITLE_EXPRESSION,
+  TitleExpression,
+  SEPARATOR_EXPRESSION,
+  SeparatorExpression,
 } from '../parser/parser'
 import {dateFactory} from './enviroment/date_factory'
 import {evaluateTimesBinary} from './binary_calculations'
@@ -71,12 +77,40 @@ type PrintPredict = {
   }[]
 }
 
-export type Print = {
-  type: 'print'
-  line: number
-} & (PrintPrint | PrintProgress | PrintPie | PrintPredict | PrintBar)
+const checkbox = 'checkbox'
+type CheckboxMarkdown = {
+  type: 'markdown'
+  dataType: typeof checkbox
+  value: boolean
+}
 
-type DataFlow = ParsedNumber | NumberVariable | Print
+const title = 'title'
+type TitleMarkdown = {
+  type: 'markdown'
+  dataType: typeof title
+  value: number
+}
+
+const separator = 'separator'
+type SeparatorMarkdown = {
+  type: 'markdown'
+  dataType: typeof separator
+}
+
+type Markdown = {
+  type: 'markdown'
+  line: number
+  pos: number
+} & (CheckboxMarkdown | TitleMarkdown | SeparatorMarkdown)
+
+export type Print =
+  | ({
+      type: 'print'
+      line: number
+    } & (PrintPrint | PrintProgress | PrintPie | PrintPredict | PrintBar))
+  | Markdown
+
+type DataFlow = ParsedNumber | NumberVariable | Print | Markdown
 
 export function evaluateNumeric(
   expression: NumericLiteral | UnitExpression,
@@ -342,6 +376,10 @@ function evaluateSpread(
     return []
   }
 
+  if (evaluated.type === 'markdown') {
+    return []
+  }
+
   if (evaluated.references) {
     const variables: Variable[] = []
     for (const reference of evaluated.references) {
@@ -582,6 +620,35 @@ function evaluateOutput(output: OutputExpression, env: Env): Print {
   }
 }
 
+function evaluateCheckbox(ex: CheckboxExpression, env: Env): Markdown {
+  return {
+    type: 'markdown',
+    dataType: checkbox,
+    value: ex.checked,
+    line: ex.position.line,
+    pos: ex.position.start,
+  }
+}
+
+function evaluateTitle(ex: TitleExpression, env: Env): Markdown {
+  return {
+    type: 'markdown',
+    dataType: title,
+    value: ex.version,
+    line: ex.position.line,
+    pos: ex.position.start,
+  }
+}
+
+function evaluateSeparator(ex: SeparatorExpression): Markdown {
+  return {
+    type: 'markdown',
+    dataType: separator,
+    line: ex.position.line,
+    pos: ex.position.start,
+  }
+}
+
 function evaluateExpression(expression: Expression, env: Env) {
   switch (expression.type) {
     case UNIT_EXPRESSION:
@@ -599,6 +666,12 @@ function evaluateExpression(expression: Expression, env: Env) {
       return evaluateSpread(expression, env)
     case OUTPUT_EXPRESSION:
       return evaluateOutput(expression, env)
+    case CHECKBOX_EXPRESSION:
+      return evaluateCheckbox(expression, env)
+    case TITLE_EXPRESSION:
+      return evaluateTitle(expression, env)
+    case SEPARATOR_EXPRESSION:
+      return evaluateSeparator(expression)
 
     default:
       throw new EvaluatorError(
