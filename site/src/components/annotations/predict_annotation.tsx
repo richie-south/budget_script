@@ -34,13 +34,11 @@ export class LineChartAnnotationWidget extends WidgetType {
     let tickValues: any = undefined // Default: show all
 
     if (dataLength > 10) {
-      try {
-        tickValues = [
-          firstSeries[0].x,
-          firstSeries[firstSeries.length / 2].x,
-          firstSeries[firstSeries.length - 1].x,
-        ]
-      } catch (error) {}
+      tickValues = [
+        firstSeries[0].x,
+        firstSeries[Math.floor(firstSeries.length / 2)].x,
+        firstSeries[firstSeries.length - 1].x,
+      ]
     }
 
     const chartTheme = {
@@ -85,7 +83,11 @@ export class LineChartAnnotationWidget extends WidgetType {
     }
 
     root.render(
-      <ErrorBoundary fallback={<div className="error-ui">Failed to render prediction chart.</div>}>
+      <ErrorBoundary
+        fallback={
+          <div className="error-ui">Failed to render prediction chart.</div>
+        }
+      >
         <CollapsibleBox id={this.id} title="Prediction Chart">
           <div
             className="cm-piechart-anno"
