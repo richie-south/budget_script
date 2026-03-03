@@ -1,6 +1,6 @@
 # Budget Script
 
-_README and most of /site is ai generated_
+_README and most of /site is ai generated_. But all of /lang is built by me :)
 
 Budget Script is a domain-specific language (DSL) designed for live financial calculations. Inspired by Apple Math Notes, it allows you to define variables, track recurring expenses, and visualize your financial future directly within the editor.
 
