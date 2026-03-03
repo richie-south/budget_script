@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef } from "react"
-import { EditorView, Decoration, DecorationSet } from "@codemirror/view"
+import { EditorView, Decoration, DecorationSet, ViewPlugin } from "@codemirror/view"
 import { EditorState, StateField } from "@codemirror/state"
 import { basicSetup } from "codemirror"
 import {
@@ -231,6 +231,114 @@ const budgetPlugin = StateField.define<DecorationSet>({
   provide: (f) => EditorView.decorations.from(f),
 })
 
+const contextMenuItems = [
+  { label: "Checkbox", insert: "[ ] " },
+  { type: "divider" as const },
+  { label: "Title 1", insert: "# " },
+  { label: "Title 2", insert: "## " },
+  { label: "Title 3", insert: "### " },
+  { label: "Title 4", insert: "#### " },
+  { label: "Title 5", insert: "##### " },
+  { label: "Title 6", insert: "###### " },
+  { type: "divider" as const },
+  { label: "Separator", insert: "---" },
+]
+
+function createContextMenu(view: EditorView, x: number, y: number) {
+  removeContextMenu()
+
+  const menu = document.createElement("div")
+  menu.className = "cm-context-menu"
+  menu.style.left = `${x}px`
+  menu.style.top = `${y}px`
+
+  for (const item of contextMenuItems) {
+    if ("type" in item && item.type === "divider") {
+      const divider = document.createElement("div")
+      divider.className = "cm-context-menu-divider"
+      menu.appendChild(divider)
+      continue
+    }
+
+    const btn = document.createElement("button")
+    btn.className = "cm-context-menu-item"
+    btn.textContent = (item as { label: string }).label
+
+    const hint = document.createElement("span")
+    hint.className = "cm-context-menu-hint"
+    hint.textContent = (item as { insert: string }).insert.trim()
+    btn.appendChild(hint)
+
+    btn.addEventListener("mousedown", (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      const insertText = (item as { insert: string }).insert
+      const cursor = view.state.selection.main.head
+      view.dispatch({
+        changes: { from: cursor, insert: insertText },
+        selection: { anchor: cursor + insertText.length },
+      })
+      view.focus()
+      removeContextMenu()
+    })
+
+    menu.appendChild(btn)
+  }
+
+  document.body.appendChild(menu)
+
+  const rect = menu.getBoundingClientRect()
+  if (rect.right > window.innerWidth) {
+    menu.style.left = `${x - rect.width}px`
+  }
+  if (rect.bottom > window.innerHeight) {
+    menu.style.top = `${y - rect.height}px`
+  }
+
+  const cleanup = () => {
+    document.removeEventListener("mousedown", dismiss, true)
+    document.removeEventListener("keydown", dismissKey, true)
+  }
+  const dismiss = (e: Event) => {
+    if (!menu.contains(e.target as Node)) {
+      removeContextMenu()
+      cleanup()
+    }
+  }
+  const dismissKey = (e: KeyboardEvent) => {
+    if (e.key === "Escape") {
+      removeContextMenu()
+      cleanup()
+      view.focus()
+    }
+  }
+
+  requestAnimationFrame(() => {
+    document.addEventListener("mousedown", dismiss, true)
+    document.addEventListener("keydown", dismissKey, true)
+  })
+}
+
+function removeContextMenu() {
+  document.querySelectorAll(".cm-context-menu").forEach((el) => el.remove())
+}
+
+const contextMenuExtension = ViewPlugin.fromClass(
+  class {
+    destroy() {
+      removeContextMenu()
+    }
+  },
+  {
+    eventHandlers: {
+      contextmenu(e: MouseEvent, view: EditorView) {
+        e.preventDefault()
+        createContextMenu(view, e.clientX, e.clientY)
+      },
+    },
+  },
+)
+
 interface EditorProps {
   initialContent: string
   onChange: (content: string) => void
@@ -298,6 +406,7 @@ export const Editor = memo(
           theme,
           budgetLanguage,
           syntaxHighlighting(budgetHighlightStyle),
+          contextMenuExtension,
         ],
       })
 

@@ -850,3 +850,69 @@ input[type="checkbox"]:focus-visible {
   display: block;
   opacity: 0.8;
 }
+
+/* Context Menu */
+.cm-context-menu {
+  position: fixed;
+  z-index: 10000;
+  background: var(--box-bg);
+  border: 1px solid var(--box-border);
+  border-radius: 12px;
+  padding: 4px;
+  min-width: 180px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  animation: contextMenuIn 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes contextMenuIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.cm-context-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--box-text-primary);
+  font-family: "Instrument Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.1s ease, color 0.1s ease;
+  text-align: left;
+}
+
+.cm-context-menu-item:hover {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
+.cm-context-menu-hint {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  color: var(--box-text-muted);
+  margin-left: 16px;
+  opacity: 0.6;
+}
+
+.cm-context-menu-item:hover .cm-context-menu-hint {
+  color: var(--accent);
+  opacity: 0.7;
+}
+
+.cm-context-menu-divider {
+  height: 1px;
+  background: var(--box-border);
+  margin: 4px 8px;
+}
