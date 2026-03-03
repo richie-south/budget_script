@@ -21,6 +21,7 @@ import {
 } from "./annotations/bar_annotation"
 import { budgetHighlightStyle, budgetLanguage } from "../lib/syntax"
 import { syntaxHighlighting } from "@codemirror/language"
+import { CheckboxWidget } from "./annotations/checkbox_annotation"
 
 function getDecorations(state: EditorState): DecorationSet {
   const widgets: any[] = []
@@ -34,6 +35,9 @@ function getDecorations(state: EditorState): DecorationSet {
     const pieCharts = evaluated.filter((a) => a.dataType === "pie")
     const predictCharts = evaluated.filter((a) => a.dataType === "predict")
     const barCharts = evaluated.filter((a) => a.dataType === "bar")
+    const checkboxes = evaluated.filter((a) => a.dataType === "checkbox")
+    const titles = evaluated.filter((a) => a.dataType === "title")
+    const separator = evaluated.filter((a) => a.dataType === "separator")
 
     for (const result of prints) {
       try {
@@ -128,6 +132,69 @@ function getDecorations(state: EditorState): DecorationSet {
         }
       } catch (e) {
         console.log("bar chart error", e)
+      }
+    }
+
+    for (const result of checkboxes) {
+      try {
+        const line = state.doc.line(result.line + 1)
+        const absolutePos = line.from + result.pos
+
+        widgets.push(
+          Decoration.replace({
+            widget: new CheckboxWidget(result.value, result.pos),
+          }).range(absolutePos, absolutePos + 3),
+        )
+      } catch (e) {
+        console.log("e", e)
+      }
+    }
+
+    for (const result of titles) {
+      try {
+        const line = state.doc.line(result.line + 1)
+
+        widgets.push(
+          Decoration.line({
+            attributes: {
+              class: `cm-h${result.value}-row`,
+              style: "display: block;",
+            },
+          }).range(line.from),
+        )
+
+        const absolutePos = line.from + result.pos
+        widgets.push(
+          Decoration.replace({}).range(
+            line.from,
+            absolutePos + result.value + (result.value === 1 ? 1 : 0),
+          ),
+        )
+      } catch (e) {
+        console.log("e", e)
+      }
+    }
+
+    for (const result of separator) {
+      try {
+        const line = state.doc.line(result.line + 1)
+
+        widgets.push(
+          Decoration.line({
+            attributes: {
+              class: `cm-separator-row`,
+              style: "display: block;",
+            },
+          }).range(line.from),
+        )
+
+        widgets.push(
+          Decoration.replace({
+            block: false,
+          }).range(line.from, line.to),
+        )
+      } catch (e) {
+        console.log("e", e)
       }
     }
 

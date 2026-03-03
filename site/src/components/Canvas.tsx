@@ -25,7 +25,10 @@ interface CanvasProps {
 
 type Tool = "select" | "create"
 type DragMode = "create" | "move" | "resize" | null
-type PendingDelete = { type: "canvas"; id: string; name: string } | { type: "note"; id: string; name: string } | null
+type PendingDelete =
+  | { type: "canvas"; id: string; name: string }
+  | { type: "note"; id: string; name: string }
+  | null
 
 const GRID_SIZE = 20
 const MIN_SIZE = GRID_SIZE * 4
@@ -146,9 +149,10 @@ export function Canvas({
       } else if (mode === "move" && noteId && start) {
         const note = currentNotes.find((n) => n.id === noteId)
         if (note) {
+          const y = snap(note.y + final.y - start.y)
           callbacksRef.current.onUpdateNote(noteId, {
             x: snap(note.x + final.x - start.x),
-            y: snap(note.y + final.y - start.y),
+            y: y < 0 ? 0 : y,
           })
         }
       } else if (mode === "resize" && noteId && start) {
@@ -289,7 +293,9 @@ export function Canvas({
                   className="canvas-name-input"
                   value={canvas.name}
                   readOnly={!isActive}
-                  onChange={(e) => onUpdateCanvasName(canvas.id, e.target.value)}
+                  onChange={(e) =>
+                    onUpdateCanvasName(canvas.id, e.target.value)
+                  }
                   onClick={(e) => {
                     if (isActive) e.stopPropagation()
                   }}
@@ -302,7 +308,11 @@ export function Canvas({
                     className="canvas-delete-btn"
                     onClick={(e) => {
                       e.stopPropagation()
-                      setPendingDelete({ type: "canvas", id: canvas.id, name: canvas.name })
+                      setPendingDelete({
+                        type: "canvas",
+                        id: canvas.id,
+                        name: canvas.name,
+                      })
                     }}
                     title="Delete Canvas"
                   >
@@ -369,7 +379,13 @@ export function Canvas({
               onResizeStart={(e) => beginDrag(e, "resize", note.id)}
               onUpdateContent={(content) => onUpdateNote(note.id, { content })}
               onUpdateTitle={(title) => onUpdateNote(note.id, { title })}
-              onDelete={() => setPendingDelete({ type: "note", id: note.id, name: note.title })}
+              onDelete={() =>
+                setPendingDelete({
+                  type: "note",
+                  id: note.id,
+                  name: note.title,
+                })
+              }
             />
           )
         })}
@@ -378,7 +394,9 @@ export function Canvas({
 
       {pendingDelete && (
         <ConfirmDialog
-          title={pendingDelete.type === "canvas" ? "Delete Canvas" : "Delete Card"}
+          title={
+            pendingDelete.type === "canvas" ? "Delete Canvas" : "Delete Card"
+          }
           message={`Are you sure you want to delete "${pendingDelete.name}"? This cannot be undone.`}
           onConfirm={() => {
             if (pendingDelete.type === "canvas") {

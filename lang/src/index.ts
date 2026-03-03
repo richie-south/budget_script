@@ -14,6 +14,6 @@ export function budgetScript(src: string): Print[] {
       return false
     }
 
-    return v.type === 'print'
+    return v.type === 'print' || v.type === 'markdown'
   }) as Print[]
 }
