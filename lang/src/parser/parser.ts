@@ -82,7 +82,7 @@ export type UnitExpression = {
   type: typeof UNIT_EXPRESSION
   value: number
   unit: string
-  span: SpanExpression
+  span?: SpanExpression
 } & Base
 
 export const BINARY_EXPRESSION = 'BinaryExpression'
