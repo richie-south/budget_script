@@ -692,7 +692,7 @@ describe('evaluator', () => {
     goal = 60
     #predict saving goal`
 
-    const env = enviroment(new Date())
+    const env = enviroment(new Date(2026, 1))
     const ast = parser(src)
     const result = evaluate(ast, env)
 
@@ -1129,6 +1129,154 @@ data = ett + två
             permanent: true,
           },
         ],
+      },
+    ])
+  })
+})
+
+describe('markdown', () => {
+  it('empty checkbox', () => {
+    const src = `[ ] checkbox`
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'markdown',
+        dataType: 'checkbox',
+        value: false,
+        line: 0,
+        pos: 0,
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 0,
+        line: 0,
+        identifier: 'checkbox',
+      },
+    ])
+  })
+
+  it('empty checkbox', () => {
+    const src = `[x] checkbox`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'markdown',
+        dataType: 'checkbox',
+        value: true,
+        line: 0,
+        pos: 0,
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 0,
+        line: 0,
+        identifier: 'checkbox',
+      },
+    ])
+  })
+
+  it('bubble checkboxs', () => {
+    const src = `[x] checkbox [ ]`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'markdown',
+        dataType: 'checkbox',
+        value: true,
+        line: 0,
+        pos: 0,
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 0,
+        line: 0,
+        identifier: 'checkbox',
+      },
+      {
+        type: 'markdown',
+        dataType: 'checkbox',
+        value: false,
+        line: 0,
+        pos: 13,
+      },
+    ])
+  })
+
+  it('title', () => {
+    const src = `# hej`
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'markdown',
+        dataType: 'title',
+        value: 1,
+        line: 0,
+        pos: 0,
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 0,
+        line: 0,
+        identifier: 'hej',
+      },
+    ])
+  })
+
+  it('titles', () => {
+    const src = `#### hej`
+
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'markdown',
+        dataType: 'title',
+        value: 4,
+        line: 0,
+        pos: 0,
+      },
+      {
+        type: 'variable',
+        dataType: 'number',
+        value: 0,
+        line: 0,
+        identifier: 'hej',
+      },
+    ])
+  })
+
+  it('separator', () => {
+    const src = `---`
+    const env = enviroment(new Date())
+    const ast = parser(src)
+    const result = evaluate(ast, env)
+
+    expect(result).toEqual([
+      {
+        type: 'markdown',
+        dataType: 'separator',
+        line: 0,
+        pos: 0,
       },
     ])
   })

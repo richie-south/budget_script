@@ -2030,3 +2030,183 @@ monthly = netflix + hundmat + spotify`
     })
   })
 })
+
+describe('markdown', () => {
+  it('empty checkbox', () => {
+    const src = `[ ] checkbox`
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'CheckboxExpression',
+          symbol: ' ',
+          position: {
+            line: 0,
+            start: 0,
+            end: 3,
+          },
+          checked: false,
+        },
+        {
+          type: 'Identifier',
+          symbol: 'checkbox',
+          position: {
+            line: 0,
+            start: 4,
+            end: 12,
+          },
+        },
+      ],
+    })
+  })
+
+  it('empty checkbox', () => {
+    const src = `[x] checkbox`
+
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'CheckboxExpression',
+          symbol: 'x',
+          position: {
+            line: 0,
+            start: 0,
+            end: 3,
+          },
+          checked: true,
+        },
+        {
+          type: 'Identifier',
+          symbol: 'checkbox',
+          position: {
+            line: 0,
+            start: 4,
+            end: 12,
+          },
+        },
+      ],
+    })
+  })
+
+  it('bubble checkboxs', () => {
+    const src = `[x] checkbox [ ]`
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'CheckboxExpression',
+          symbol: 'x',
+          position: {
+            line: 0,
+            start: 0,
+            end: 3,
+          },
+          checked: true,
+        },
+        {
+          type: 'Identifier',
+          symbol: 'checkbox',
+          position: {
+            line: 0,
+            start: 4,
+            end: 12,
+          },
+        },
+        {
+          type: 'CheckboxExpression',
+          symbol: ' ',
+          position: {
+            line: 0,
+            start: 13,
+            end: 16,
+          },
+          checked: false,
+        },
+      ],
+    })
+  })
+
+  it('title', () => {
+    const src = `# hej`
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'TitleExpression',
+          version: 1,
+          position: {
+            line: 0,
+            start: 0,
+            end: 1,
+          },
+        },
+        {
+          type: 'Identifier',
+          symbol: 'hej',
+          position: {
+            line: 0,
+            start: 2,
+            end: 5,
+          },
+        },
+      ],
+    })
+  })
+
+  it('titles', () => {
+    const src = `#### hej`
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'TitleExpression',
+          version: 4,
+          position: {
+            line: 0,
+            start: 0,
+            end: 4,
+          },
+        },
+        {
+          type: 'Identifier',
+          symbol: 'hej',
+          position: {
+            line: 0,
+            start: 5,
+            end: 8,
+          },
+        },
+      ],
+    })
+  })
+
+  it('separator', () => {
+    const src = `---`
+    const result = parser(src)
+
+    expect(result).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'SeparatorExpression',
+          position: {
+            line: 0,
+            start: 0,
+            end: 3,
+          },
+        },
+      ],
+    })
+  })
+})

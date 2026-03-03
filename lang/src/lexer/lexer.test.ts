@@ -775,3 +775,130 @@ describe('lexer', () => {
     ])
   })
 })
+
+describe('markdown', () => {
+  it('empty checkbox', () => {
+    const src = `[ ] checkbox`
+    const result = tokenize(src)
+
+    expect(result).toEqual([
+      {
+        type: 'Checkbox',
+        value: ' ',
+        checked: false,
+        position: {line: 0, start: 0, end: 3},
+      },
+      {
+        value: 'checkbox',
+        type: 'Identifier',
+        position: {line: 0, start: 4, end: 12},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('checked checkbox', () => {
+    const src = `[x] checkbox`
+    const result = tokenize(src)
+
+    expect(result).toEqual([
+      {
+        type: 'Checkbox',
+        value: 'x',
+        checked: true,
+        position: {line: 0, start: 0, end: 3},
+      },
+      {
+        value: 'checkbox',
+        type: 'Identifier',
+        position: {line: 0, start: 4, end: 12},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('bubble checkboxs', () => {
+    const src = `[x] checkbox [ ]`
+    const result = tokenize(src)
+
+    expect(result).toEqual([
+      {
+        type: 'Checkbox',
+        value: 'x',
+        checked: true,
+        position: {line: 0, start: 0, end: 3},
+      },
+      {
+        value: 'checkbox',
+        type: 'Identifier',
+        position: {line: 0, start: 4, end: 12},
+      },
+      {
+        type: 'Checkbox',
+        value: ' ',
+        checked: false,
+        position: {line: 0, start: 13, end: 16},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('title', () => {
+    const src = `# hej`
+    const result = tokenize(src)
+
+    expect(result).toEqual([
+      {
+        type: 'Title',
+        version: 1,
+        position: {line: 0, start: 0, end: 1},
+      },
+      {
+        value: 'hej',
+        type: 'Identifier',
+        position: {line: 0, start: 2, end: 5},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('titles', () => {
+    const src = `#### hej`
+    const result = tokenize(src)
+
+    expect(result).toEqual([
+      {
+        type: 'Title',
+        version: 4,
+        position: {line: 0, start: 0, end: 4},
+      },
+      {
+        value: 'hej',
+        type: 'Identifier',
+        position: {line: 0, start: 5, end: 8},
+      },
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('separator', () => {
+    const src = `---`
+    const result = tokenize(src)
+
+    expect(result).toEqual([
+      {type: 'Separator', position: {line: 0, start: 0, end: 3}},
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+
+  it('bold', () => {
+    const src = `__bold__`
+    const result = tokenize(src)
+    console.log('result', result)
+
+    expect(result).toEqual([
+      {type: 'Separator', position: {line: 0, start: 0, end: 3}},
+      {value: 'EOF', type: 'EOF'},
+    ])
+  })
+})
